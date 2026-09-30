@@ -1,0 +1,15 @@
+Date,Item_Name,SKU,Category,Units_Sold,Unit_Price,Cost_Price,Supplier
+2026-09-01,Organic Alphonso Mango Puree,GROC-101,Grocery,45,8.50,5.20,Metro Fresh Foods
+2026-09-01,Cold Pressed Sunflower Oil 1L,GROC-102,Grocery,62,5.20,3.60,Metro Fresh Foods
+2026-09-02,Basmati Aged Rice 5kg,GROC-103,Grocery,38,18.00,12.50,Metro Fresh Foods
+2026-09-02,Pure Himalayan Shilajit Resin,HLTH-201,Health & Wellness,18,34.00,20.00,Apex Naturals
+2026-09-03,Raw Organic Forest Honey 500g,HLTH-202,Health & Wellness,29,12.00,7.50,Apex Naturals
+2026-09-03,Organic Green Tea 100 Bags,HLTH-203,Health & Wellness,52,14.50,8.90,Apex Naturals
+2026-09-04,Wireless Noise Cancelling Earbuds,ELEC-301,Electronics,14,79.99,48.00,Zenith Global Tech
+2026-09-04,USB-C Braided Fast Cable 2m,ELEC-302,Electronics,85,9.99,3.80,Zenith Global Tech
+2026-09-05,Magnetic Wireless Power Bank 10k,ELEC-303,Electronics,22,45.00,26.00,Zenith Global Tech
+2026-09-05,Pure Cotton Linen Shirt Blue M,APPR-401,Apparel,31,42.00,21.00,Vogue Threads
+2026-09-06,Slim Fit Denim Jeans 32W,APPR-402,Apparel,19,55.00,28.00,Vogue Threads
+2026-09-06,Bamboo Anti-Odor Ankle Socks 5pk,APPR-403,Apparel,64,15.00,6.50,Vogue Threads
+2026-09-07,Probiotic Daily Capsules 60ct,PHAR-501,Pharmacy,41,24.00,14.00,Apex Naturals
+2026-09-07,Vitamin D3 + K2 Liquid Drops,PHAR-502,Pharmacy,36,19.50,10.80,Apex Naturals

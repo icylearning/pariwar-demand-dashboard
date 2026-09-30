@@ -1,0 +1,417 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Transitions */
+.transition-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.transition-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+/* Pulse animation */
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Toast animations */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.toast-enter {
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.toast-exit {
+  animation: fadeOut 0.25s ease-out forwards;
+}
+
+/* High-Contrast Range Slider Styling (Black & Gray - Easily Seen) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #64748b; /* Strong visible slate gray track */
+  border: 1px solid #475569;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: background 0.2s ease;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* Chrome / Safari / Edge Thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #0f172a; /* Bold solid black / dark slate */
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #1e293b;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+  background: #000000;
+}
+
+/* Firefox Thumb & Track */
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: #0f172a;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #1e293b;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: #64748b;
+  border: 1px solid #475569;
+  border-radius: 9999px;
+}
+
+
+/* Drag & drop highlight */
+.drag-over {
+  border-color: #550000 !important;
+  background-color: #fdf2f2 !important;
+}
+
+/* Keep the file input in the accessibility tree so browsers honor programmatic .click() */
+.sr-only-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.modal-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+/* Print Styles for Purchase Orders */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #poPrintArea, #poPrintArea * {
+    visibility: visible;
+  }
+  #poPrintArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Touch scroll optimizations for mobile devices (Instruction 7) */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 13px;
+  }
+  .scroll-touch::-webkit-scrollbar {
+    display: none;
+  }
+  .scroll-touch {
+    scrollbar-width: none;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ==========================================================================
+   Comprehensive Dark Mode System — High Contrast Edition
+   ========================================================================== */
+html.dark body {
+  background-color: #0b0f1a !important;
+  color: #f0f4ff !important;
+}
+
+html.dark header {
+  background-color: rgba(10, 14, 26, 0.97) !important;
+  border-color: #2d3a50 !important;
+}
+
+html.dark .bg-white {
+  background-color: #131d2e !important;
+  border-color: #2d3a50 !important;
+  color: #eef2ff !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/50,
+html.dark .bg-slate-50\/60 {
+  background-color: #0e1726 !important;
+  border-color: #253045 !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1a2840 !important;
+  border-color: #2d3a50 !important;
+  color: #c8d6f0 !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/70,
+html.dark .border-slate-100 {
+  border-color: #253045 !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f0f4ff !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #b8cce8 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #7a9abf !important;
+}
+
+/* Highlighted slider box in dark mode */
+html.dark .border-slate-700 {
+  border-color: #4a6080 !important;
+}
+
+/* Dark Mode Inputs & Controls */
+html.dark input[type="text"],
+html.dark input[type="number"],
+html.dark select,
+html.dark textarea {
+  background-color: #1a2840 !important;
+  border-color: #2d3a50 !important;
+  color: #f0f4ff !important;
+}
+
+html.dark input[type="text"]::placeholder,
+html.dark textarea::placeholder {
+  color: #4a6080 !important;
+}
+
+/* Dark Mode Slider Overrides (High-contrast and easily seen) */
+html.dark input[type="range"] {
+  background: #2d4060 !important;
+  border-color: #3d5075 !important;
+}
+
+html.dark input[type="range"]::-webkit-slider-thumb {
+  background: #ffffff !important; /* Bright white thumb on dark track */
+  border: 3px solid #131d2e !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+html.dark input[type="range"]::-webkit-slider-thumb:hover {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.2), 0 3px 10px rgba(0, 0, 0, 0.9) !important;
+}
+
+html.dark input[type="range"]::-moz-range-thumb {
+  background: #ffffff !important;
+  border: 3px solid #131d2e !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+html.dark input[type="range"]::-moz-range-track {
+  background: #2d4060 !important;
+  border-color: #3d5075 !important;
+}
+
+/* Dark Mode Table Rows & Modals */
+html.dark tr:hover {
+  background-color: rgba(30, 50, 75, 0.8) !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #253045 !important;
+}
+
+html.dark #poPrintArea {
+  background-color: #131d2e !important;
+  color: #f0f4ff !important;
+}
+
+html.dark .bg-red-50,
+html.dark .bg-red-50\/80,
+html.dark .bg-red-50\/50 {
+  background-color: #2a0f0f !important;
+  border-color: #5a1f1f !important;
+}
+
+html.dark #profileEditorDropdown {
+  background-color: #131d2e !important;
+  border-color: #253045 !important;
+}
+
+/* Dark mode: shadow areas and card surfaces */
+html.dark .shadow-2xs,
+html.dark .shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Dark mode: table borders */
+html.dark .border-slate-100 {
+  border-color: #253045 !important;
+}
+
+/* Dark mode: indigo accent overrides for legibility */
+html.dark .bg-indigo-50 {
+  background-color: #192540 !important;
+}
+html.dark .text-indigo-600,
+html.dark .text-indigo-700 {
+  color: #7eb3f0 !important;
+}
+html.dark .border-indigo-200\/60 {
+  border-color: #2d4a70 !important;
+}
+
+/* Dark mode: amber overrides */
+html.dark .bg-amber-50 {
+  background-color: #2a2000 !important;
+}
+html.dark .text-amber-700,
+html.dark .text-amber-800 {
+  color: #f0c840 !important;
+}
+
+/* Dark mode: emerald accent */
+html.dark .text-emerald-600,
+html.dark .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+/* Dark mode: button surfaces */
+html.dark .bg-slate-200 {
+  background-color: #1a2840 !important;
+}
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #1a2840 !important;
+}
+
