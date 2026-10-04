@@ -289,19 +289,13 @@ function computeAggregateHealth() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  if (window.lucide) window.lucide.createIcons();
-  
-  // Default select all urgent / high demand items for PO
-  const health = computeAggregateHealth();
-  health.enriched.forEach(item => {
-    if (item.recommendedPOQty > 0) {
-      StockPulse.selectedSkusForPO.add(item.sku);
-    }
-  });
-
-  renderAllViews();
   setupEventListeners();
   setupDragAndDrop();
+
+  // Load Pariwar Supermarket sales data by default so the dashboard is immediately active and rich
+  loadPariwarSalesData({ initialLoad: true });
+
+  if (window.lucide) window.lucide.createIcons();
 });
 
 
@@ -329,6 +323,9 @@ function renderAllViews() {
   // 7. Weekly Sales Intelligence
   renderWeeklySalesIntelligence(health.enriched);
 
+  // 8. Store Highlights & Operational Intelligence
+  renderStoreHighlights(health.enriched);
+
   if (window.lucide) window.lucide.createIcons();
 }
 
@@ -348,6 +345,92 @@ function updateHealthCards(health) {
 
   const urgentBadge = document.getElementById('urgentCountBadge');
   if (urgentBadge) urgentBadge.textContent = `${health.urgentStockoutCount} critical`;
+}
+
+function renderStoreHighlights(enrichedItems) {
+  if (!enrichedItems || enrichedItems.length === 0) return;
+
+  // 1. Top 5 Velocity Champions
+  const fastMoversList = document.getElementById('overviewFastMoversList');
+  if (fastMoversList) {
+    const sortedByVelocity = [...enrichedItems].sort((a, b) => b.effectiveVelocity - a.effectiveVelocity).slice(0, 5);
+    fastMoversList.innerHTML = sortedByVelocity.map((item, idx) => `
+      <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+        <div class="flex items-center gap-2 truncate max-w-[200px]">
+          <span class="w-5 h-5 rounded-full bg-amber-50 text-amber-700 font-bold text-[10px] flex items-center justify-center shrink-0 border border-amber-200">${idx + 1}</span>
+          <div class="truncate">
+            <span class="font-bold text-slate-800 truncate block">${item.name}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${item.sku} &bull; ${item.category}</span>
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <span class="font-mono font-bold text-slate-900 block">${item.effectiveVelocity} u/day</span>
+          <span class="text-[10px] ${item.daysToStockout <= item.leadTimeDays ? 'text-rose-600 font-bold' : 'text-emerald-600 font-medium'}">${item.daysToStockout}d stock left</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 2. Category Contribution
+  const categoryList = document.getElementById('overviewCategoryList');
+  if (categoryList) {
+    const categoryTotals = {};
+    let totalVolume = 0;
+    enrichedItems.forEach(item => {
+      categoryTotals[item.category] = (categoryTotals[item.category] || 0) + item.projectedDemand;
+      totalVolume += item.projectedDemand;
+    });
+
+    const sortedCategories = Object.entries(categoryTotals)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    categoryList.innerHTML = sortedCategories.map(([cat, vol]) => {
+      const pct = totalVolume > 0 ? Math.round((vol / totalVolume) * 100) : 0;
+      return `
+        <div class="space-y-1 py-1.5 border-b border-slate-100 last:border-0">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800 truncate max-w-[180px]">${cat}</span>
+            <span class="font-mono font-bold text-slate-900">${pct}% (${vol.toLocaleString('en-IN')} units)</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
+            <div class="bg-indigo-600 h-1.5 rounded-full" style="width: ${Math.min(100, Math.max(8, pct))}%"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 3. Supplier Restock Dispatch Status
+  const vendorList = document.getElementById('overviewVendorList');
+  if (vendorList) {
+    const supplierMap = {};
+    enrichedItems.forEach(item => {
+      if (!supplierMap[item.supplier]) {
+        supplierMap[item.supplier] = { name: item.supplier, leadTime: item.leadTimeDays, neededCount: 0, totalCost: 0 };
+      }
+      if (item.recommendedPOQty > 0) {
+        supplierMap[item.supplier].neededCount++;
+        supplierMap[item.supplier].totalCost += item.recommendedPOCost;
+      }
+    });
+
+    const suppliers = Object.values(supplierMap).slice(0, 5);
+    vendorList.innerHTML = suppliers.map(sup => `
+      <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+        <div>
+          <span class="font-bold text-slate-800 block truncate max-w-[170px]">${sup.name}</span>
+          <span class="text-[10px] text-slate-400">Lead time: ${sup.leadTime}d &bull; ${sup.neededCount} SKUs needed</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs font-mono font-bold text-slate-900">${StockPulse.profile.currency}${Math.round(sup.totalCost).toLocaleString('en-IN')}</span>
+          <button onclick="sendPOViaWhatsApp('${sup.name}')" class="p-1 rounded-md bg-[#25D366] text-white hover:bg-[#1da851] transition-colors cursor-pointer" title="WhatsApp Order">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 function updateStockoutAlertBanner(health) {
@@ -978,8 +1061,8 @@ function setupEventListeners() {
     });
   }
 
-  // Tab navigation (Overview, Ingestion, Forecast, Shelf-life, POs, Settings)
-  const navTabs = document.querySelectorAll('nav [data-view-target]');
+  // Tab navigation & Stepper view targets
+  const navTabs = document.querySelectorAll('[data-view-target]');
   navTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1244,16 +1327,25 @@ window.handleMultipleFiles = async function handleMultipleFiles(files) {
 // Supports standard POS exports: "Product Name,Qty Sold,Net Sale Value,MRP Value,Cost Value"
 // ============================================================================
 
-function loadPariwarSalesData() {
+function loadPariwarSalesData(options = {}) {
+  const isInitial = options.initialLoad === true;
   fetch('pariwar_sales_data.csv')
     .then(r => r.text())
     .then(text => {
-      processRetailSalesData(text, 'pariwar_sales_data.csv');
+      processRetailSalesData(text, 'pariwar_sales_data.csv', { skipUi: isInitial, merge: false });
+      renderAllViews();
+      if (!isInitial) {
+        showToast('Pariwar Supermarket sales data loaded successfully! (182 SKUs)', 'success');
+      }
     })
     .catch(err => {
-      showToast('Error loading Pariwar sales file: ' + err.message, 'error');
+      console.warn('Could not load pariwar_sales_data.csv:', err);
     });
 }
+window.loadPariwarSalesData = loadPariwarSalesData;
+window.loadSampleSalesData = function() {
+  loadPariwarSalesData({ initialLoad: false });
+};
 
 // Check if a row or product title represents a summary row
 function isSummaryRow(name) {
@@ -1378,7 +1470,7 @@ function inferSupplier(title) {
   if (t.includes('MALKIST') || t.includes('NABATI') || t.includes('KOPIKO') || t.includes('LOTTE')) {
     return { name: 'Mayora & Inbisco Distributor', phone: '+91-98700-67890', leadTime: 4 };
   }
-  return { name: 'Pariwar Central Wholesale Mart', phone: '+91-98000-11111', leadTime: 3 };
+  return { name: 'Pariwar Supermarket', phone: '+91-98000-11111', leadTime: 3 };
 }
 
 // Generate concise alphanumeric SKU from product name

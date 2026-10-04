@@ -137,11 +137,11 @@
       </div>
     </header>
 
-    <!-- Visual Workflow Pipeline Stepper (Non-duplicated options only) -->
-    <div class="bg-white px-4 sm:px-6 lg:px-8 py-2.5 no-print overflow-x-auto scroll-touch">
+    <!-- Visual Workflow Pipeline Stepper -->
+    <div class="bg-white px-4 sm:px-6 lg:px-8 py-2.5 no-print overflow-x-auto scroll-touch border-b border-slate-200">
       <div class="max-w-7xl mx-auto flex items-center justify-start text-[11px] text-slate-500 gap-2 sm:gap-4 min-w-[500px]">
         
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-gray-600 hover:bg-slate-100 px-3 py-1.5 rounded-xl bg-slate-50 transition-all shadow-2xs" data-view-target="viewIngestion">
+        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-gray-600 hover:bg-slate-100 px-3 py-1.5 rounded-xl bg-slate-50 transition-all shadow-2xs" onclick="switchMainView('viewIngestion')" data-view-target="viewIngestion">
           <span class="w-5 h-5 rounded-full bg-red-100 text-[#550000] font-bold flex items-center justify-center text-[10px]">1</span>
           <span class="font-semibold text-slate-900">Sales Upload &amp; Data Ingestion</span>
         </div>
@@ -153,7 +153,7 @@
         </div>
         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-600 shrink-0"></i>
 
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-red-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl bg-rose-50/70 transition-all shadow-2xs" data-view-target="viewOverview">
+        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-red-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl bg-rose-50/70 transition-all shadow-2xs" onclick="switchMainView('viewOverview')" data-view-target="viewOverview">
           <span class="w-5 h-5 rounded-full bg-rose-200 text-rose-800 font-bold flex items-center justify-center text-[10px]">3</span>
           <span class="font-semibold text-rose-700">Stockout Alerts &amp; Actions</span>
         </div>
@@ -165,22 +165,22 @@
     <!-- Main Container Layout with Sub-Navigation Tabs -->
     <div class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
       
-      <!-- Primary Navigation Tabs (Black Bordered Options) -->
-      <div class="p-1.5 sm:p-2 rounded-2xl bg-slate-100/90 dark:bg-slate-900/80 border-2 border-gray-600 dark:border-slate-700 no-print overflow-x-auto scroll-touch shadow-xs">
+      <!-- Primary Navigation Tabs -->
+      <div class="p-1.5 sm:p-2 rounded-2xl bg-slate-100/90 border-2 border-gray-600 no-print overflow-x-auto scroll-touch shadow-xs">
         <nav class="flex space-x-2 text-xs whitespace-nowrap min-w-max">
           <button data-view-target="viewOverview" class="nav-tab-btn active-tab px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-red-50 text-[#550000] font-bold shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             Health Dashboard
           </button>
-          <button data-view-target="viewIngestion" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
+          <button data-view-target="viewIngestion" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
             Data Ingestion &amp; Mapping
           </button>
-          <button data-view-target="viewForecast" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
+          <button data-view-target="viewForecast" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
             Demand Forecast &amp; Sliders
           </button>
-          <button data-view-target="viewPurchaseOrders" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
+          <button data-view-target="viewPurchaseOrders" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="package-check" class="w-4 h-4"></i>
             Purchase Orders (POs)
           </button>
@@ -194,6 +194,97 @@
       <!-- ================================================================== -->
       <section id="viewOverview" data-view-section class="space-y-6">
         
+        <!-- Store Overview Status Bar (Aesthetic header strip) -->
+        <div class="p-4 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 border-2 border-red-200 flex items-center justify-center text-[#550000] font-bold text-sm shrink-0">
+              <i data-lucide="store" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm font-bold text-slate-900">Pariwar Supermarket &bull; Main Branch</h2>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Engine Connected
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">BSNL Road Outlet &bull; Demand Forecasts, Safety Stock &amp; Vendor Purchase Automation</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="switchMainView('viewIngestion')" class="px-3 py-1.5 rounded-xl border-2 border-gray-600 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              Upload Sales File
+            </button>
+            <button onclick="switchMainView('viewPurchaseOrders')" class="px-3.5 py-1.5 rounded-xl border-2 border-gray-600 bg-[#550000] hover:bg-[#400000] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+              <i data-lucide="package" class="w-3.5 h-3.5"></i>
+              Purchase Orders
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Key Executive Health KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1: Projected Weekly Revenue -->
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-2 hover-elevate transition-all">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span class="font-bold text-slate-700">Projected 7-Day Revenue</span>
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiExpectedRev" class="text-xl font-bold font-mono text-slate-900">₹0</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+              <span>Velocity pace + surge</span>
+              <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.2 rounded">Optimal Pace</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Critical Stockout Risk Value -->
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-2 hover-elevate transition-all">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span class="font-bold text-slate-700">Stockout Risk Cost</span>
+              <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiStockoutRisk" class="text-xl font-bold font-mono text-rose-600">₹0</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+              <span>Runs out in lead time</span>
+              <span class="text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.2 rounded">Reorder Urgent</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Dead / Dormant Capital -->
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-2 hover-elevate transition-all">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span class="font-bold text-slate-700">Dormant Capital Locked</span>
+              <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                <i data-lucide="archive" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiDeadCapital" class="text-xl font-bold font-mono text-slate-700">₹0</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+              <span>&gt;60 days stock coverage</span>
+              <span class="text-slate-600 font-semibold bg-slate-100 px-1.5 py-0.2 rounded">Slow Movers</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Recommended Purchase Orders Value -->
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-2 hover-elevate transition-all">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span class="font-bold text-slate-700">Recommended PO Budget</span>
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="package-check" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div id="kpiReorderNeeded" class="text-xl font-bold font-mono text-emerald-700">₹0</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+              <span>Grouped by supplier</span>
+              <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded">Ready to Order</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Urgent Stockout Risk Alert Banner (Red Bordered) -->
         <div id="stockoutAlertBanner" class="p-4 rounded-2xl bg-rose-50 border-2 border-red-500 shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
@@ -262,6 +353,53 @@
 
         </div>
 
+        <!-- Store Operational Intelligence Highlights -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Column 1: Top Velocity SKUs -->
+          <div class="p-5 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Fastest Moving Products</h4>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Pace / day</span>
+            </div>
+            <div id="overviewFastMoversList" class="space-y-2 text-xs">
+              <!-- Dynamically populated via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Column 2: Department Sales Distribution -->
+          <div class="p-5 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i>
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Category Contribution</h4>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Volume share</span>
+            </div>
+            <div id="overviewCategoryList" class="space-y-2 text-xs">
+              <!-- Dynamically populated via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Column 3: Supplier Restock Dispatch Status -->
+          <div class="p-5 rounded-2xl bg-white border-2 border-gray-600 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <i data-lucide="truck" class="w-4 h-4 text-emerald-600"></i>
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Vendor Restock Dispatch</h4>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Lead times</span>
+            </div>
+            <div id="overviewVendorList" class="space-y-2 text-xs">
+              <!-- Dynamically populated via JavaScript -->
+            </div>
+          </div>
+
+        </div>
+
       </section>
 
 
@@ -313,27 +451,29 @@
             </div>
           </div>
 
-          <!-- Hidden file input placed outside the drop zone to avoid click-blocking issues -->
-          <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls,.tsv,.txt,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple
-            style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;">
+          <!-- Hidden file input -->
+          <input type="file" id="csvFileInput" class="hidden" accept=".csv,.xlsx,.xls,.tsv,.txt,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple>
 
           <!-- Mode 1: Drag and Drop Zone -->
           <div id="ingestUploadArea" class="mt-5 space-y-4">
-            <div id="csvDropZone" class="relative border-2 border-dashed border-slate-400 dark:border-slate-600 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/70 hover:bg-slate-50 hover:border-[#550000] transition-all cursor-pointer shadow-inner">
+            <div id="csvDropZone" class="relative border-2 border-dashed border-gray-600 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/70 hover:bg-slate-50 hover:border-[#550000] transition-all cursor-pointer shadow-inner">
               <div class="flex flex-col items-center justify-center">
                 <div class="w-12 h-12 rounded-xl bg-red-50 text-[#550000] border-2 border-red-200 flex items-center justify-center mb-3">
                   <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
                 </div>
-                <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100">Drag &amp; drop your Excel (.xlsx, .xls) or CSV files here</h4>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">
-                  Select one or <strong>multiple files at once</strong> (e.g. Week 1 + Week 2 + Week 3). Automatic header detection &amp; unit margin calculations.
+                <h4 class="text-sm font-bold text-slate-800">Drag &amp; drop your Excel (.xlsx, .xls) or CSV files here</h4>
+                <p class="text-xs text-slate-500 mt-1 max-w-md">
+                  Select one or <strong>multiple weekly POS sales reports</strong>. Headers, velocities, and supplier mappings are analyzed automatically.
                 </p>
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-                  <!-- Use <label> as primary trigger — works 100% across all browsers without JS -->
-                  <label for="csvFileInput" class="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer select-none">
-                    <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
-                    Browse Local Files (Multiple Allowed)
-                  </label>
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  <button type="button" onclick="triggerFilePicker(event)" class="px-4 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 border-2 border-gray-600 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="folder-open" class="w-4 h-4"></i>
+                    Browse Local Files
+                  </button>
+                  <button type="button" id="loadSampleDataBtn" onclick="loadSampleSalesData()" class="px-4 py-2.5 text-xs font-bold text-[#550000] bg-red-50 hover:bg-red-100 border-2 border-gray-600 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-[#550000]"></i>
+                    Load Pariwar Supermarket Sample Data
+                  </button>
                 </div>
                 <span class="text-[10px] text-slate-400 mt-2">Supports .xlsx, .xls, .csv, .tsv, .txt &bull; Zero file size limits</span>
               </div>
