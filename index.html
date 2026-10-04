@@ -866,24 +866,86 @@
       <!-- ================================================================== -->
       <section id="viewPurchaseOrders" data-view-section class="hidden space-y-6">
         
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+        <!-- Header & Action Bar -->
+        <div class="p-5 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p class="text-xs text-slate-500">Auto-populated purchase drafts grouped by vendor with lead-time awareness.</p>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#851218]"></span>
+              <h2 class="text-base font-bold text-slate-900">Unified Purchase Order &amp; Restock Execution</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Consolidated store purchase order for Pariwar Supermarket &bull; All replenishment items unified in one order without categorization.</p>
           </div>
-          <!-- WhatsApp dispatch icon -->
-          <button onclick="sendPOViaWhatsApp()" title="Send via WhatsApp" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all self-start sm:self-auto cursor-pointer border border-emerald-600">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/>
-            </svg>
-            Send via WhatsApp
-          </button>
+          
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="openPOModal()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center gap-1.5">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+              <span>View Full PO Draft</span>
+            </button>
+            <button onclick="downloadPOExcel()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center gap-1.5">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              <span>Export Excel (.xlsx)</span>
+            </button>
+            <button onclick="sendPOViaWhatsApp()" title="Send via WhatsApp" class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/></svg>
+              <span>Dispatch via WhatsApp</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Supplier PO Group Cards -->
-        <div id="vendorPOGroupsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Dynamically populated via JavaScript -->
+        <!-- 4 Summary Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs">
+            <span class="text-xs text-slate-500 font-medium">Items Needing Restock</span>
+            <div id="poUnifiedItemCount" class="text-xl font-bold font-mono text-slate-900 mt-1">0 SKUs</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs">
+            <span class="text-xs text-slate-500 font-medium">Total Units to Order</span>
+            <div id="poUnifiedTotalUnits" class="text-xl font-bold font-mono text-slate-900 mt-1">0 units</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs">
+            <span class="text-xs text-slate-500 font-medium">Estimated PO Value</span>
+            <div id="poUnifiedTotalCost" class="text-xl font-bold font-mono text-emerald-700 mt-1">₹0</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs">
+            <span class="text-xs text-slate-500 font-medium">Delivery Timeline</span>
+            <div id="poUnifiedLeadTime" class="text-xl font-bold font-mono text-indigo-700 mt-1">3 - 4 Days</div>
+          </div>
         </div>
+
+        <!-- Unified PO Line Items Table (All Items Together, No Categories) -->
+        <div class="bg-white rounded-2xl border-2 border-gray-300 shadow-sm overflow-hidden">
+          <div class="p-4 border-b-2 border-gray-300 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Purchase Order Line Items</h3>
+              <p class="text-xs text-slate-500">All replenishment items across your store listed together. You can adjust order quantities directly.</p>
+            </div>
+            <button onclick="openPOModal()" class="burgundy-pill burgundy-pill-sm text-xs py-1.5 px-3 cursor-pointer">
+              Print / Save PDF
+            </button>
+          </div>
+
+          <div class="overflow-x-auto scroll-touch">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr class="bg-slate-50 border-b-2 border-gray-300 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <th class="px-4 py-3 w-12 text-center">#</th>
+                  <th class="px-4 py-3">Item Description</th>
+                  <th class="px-4 py-3 text-center">In-Store Stock</th>
+                  <th class="px-4 py-3 text-center">Reorder Point</th>
+                  <th class="px-4 py-3 text-right">Unit Cost Price</th>
+                  <th class="px-4 py-3 text-center">Order Quantity</th>
+                  <th class="px-4 py-3 text-right">Est. Line Cost</th>
+                </tr>
+              </thead>
+              <tbody id="unifiedPOTableBody" class="divide-y divide-slate-100 text-xs">
+                <!-- Dynamically populated via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Hidden legacy container for safety -->
+        <div id="vendorPOGroupsContainer" class="hidden"></div>
 
       </section>
 

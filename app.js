@@ -627,7 +627,7 @@ function renderForecastTable(enrichedItems) {
           </div>
         </td>
         <td class="px-4 py-3.5 whitespace-nowrap text-right">
-          <button onclick="openPOModalForSupplier('${item.supplier}')" class="px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs">
+          <button onclick="openPOModal()" class="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs">
             PO Draft
           </button>
         </td>
@@ -697,88 +697,95 @@ function renderExpiryTable(enrichedItems) {
 }
 
 // ----------------------------------------------------------------------------
-// Purchase Orders Grouped by Supplier
+// ----------------------------------------------------------------------------
+// Unified Store Purchase Order (Non-Categorized)
 // ----------------------------------------------------------------------------
 function renderVendorPOGroups(enrichedItems) {
-  const container = document.getElementById('vendorPOGroupsContainer');
-  if (!container) return;
+  const tableBody = document.getElementById('unifiedPOTableBody');
+  const countEl = document.getElementById('poUnifiedItemCount');
+  const unitsEl = document.getElementById('poUnifiedTotalUnits');
+  const costEl = document.getElementById('poUnifiedTotalCost');
+  const leadEl = document.getElementById('poUnifiedLeadTime');
+  const legacyContainer = document.getElementById('vendorPOGroupsContainer');
 
-  if (enrichedItems.length === 0) {
-    container.innerHTML = `
-      <div class="col-span-2 bg-white p-8 rounded-xl border border-slate-200 text-center">
-        <i data-lucide="package-search" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
-        <h4 class="text-sm font-bold text-slate-800">No Purchase Orders Generated</h4>
-        <p class="text-xs text-slate-400 mt-1">Upload your sales data to automatically group restock orders by vendor.</p>
-        <button onclick="switchMainView('viewIngestion')" class="mt-3 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-2xs">
-          Upload Sales Data
-        </button>
-      </div>
-    `;
+  if (!enrichedItems || enrichedItems.length === 0) {
+    if (tableBody) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center justify-center">
+              <i data-lucide="package-search" class="w-8 h-8 mb-2 stroke-slate-300"></i>
+              <p class="font-semibold text-slate-700 text-sm">No sales or inventory data loaded yet.</p>
+              <p class="text-xs text-slate-400 mt-1">Upload your POS sales Excel/CSV to automatically compute restock quantities.</p>
+              <button onclick="switchMainView('viewIngestion')" class="burgundy-pill text-xs py-1.5 px-4 mt-3 cursor-pointer">
+                Upload Sales Data
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+    if (countEl) countEl.textContent = '0 SKUs';
+    if (unitsEl) unitsEl.textContent = '0 units';
+    if (costEl) costEl.textContent = `${StockPulse.profile.currency}0`;
+    if (legacyContainer) legacyContainer.innerHTML = '';
     if (window.lucide) window.lucide.createIcons();
     return;
   }
 
-  // Group by supplier
-  const suppliersMap = {};
-  enrichedItems.forEach(item => {
-    if (!suppliersMap[item.supplier]) {
-      suppliersMap[item.supplier] = {
-        name: item.supplier,
-        phone: item.supplierPhone,
-        leadTime: item.leadTimeDays,
-        items: []
-      };
-    }
-    suppliersMap[item.supplier].items.push(item);
+  // Unified items requiring reorder across the entire store (no categorization)
+  const itemsNeedingPO = enrichedItems.filter(item => {
+    if (StockPulse.customPOQty && StockPulse.customPOQty[item.sku] === 0) return false;
+    return item.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(item.sku);
   });
+  const orderList = itemsNeedingPO.length > 0 
+    ? itemsNeedingPO 
+    : enrichedItems.filter(i => (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0 ? false : true)).slice(0, 20);
 
-  const supplierCards = Object.values(suppliersMap).map(supplier => {
-    const itemsNeedingPO = supplier.items.filter(i => i.recommendedPOQty > 0);
-    const totalOrderCost = itemsNeedingPO.reduce((sum, i) => sum + i.recommendedPOCost, 0);
+  let totalUnits = 0;
+  let totalCost = 0;
 
-    return `
-      <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-2xs transition-card">
-        <div class="flex items-start justify-between mb-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-              <h4 class="text-sm font-bold text-slate-900">${supplier.name}</h4>
+  if (tableBody) {
+    tableBody.innerHTML = orderList.map((item, idx) => {
+      const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
+      const lineCost = +(qty * item.costPrice).toFixed(2);
+      totalUnits += qty;
+      totalCost += lineCost;
+
+      return `
+        <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-0">
+          <td class="px-4 py-3 text-center font-mono text-slate-400">${idx + 1}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <div class="text-xs font-semibold text-slate-900">${item.name}</div>
+            <div class="text-[11px] text-slate-400 font-mono">${item.sku}</div>
+          </td>
+          <td class="px-4 py-3 text-center font-mono text-slate-700 font-medium">${item.currentStock ?? 0}</td>
+          <td class="px-4 py-3 text-center font-mono text-slate-500">${item.reorderPoint} (SS: ${item.safetyStock})</td>
+          <td class="px-4 py-3 text-right font-mono text-slate-700">${StockPulse.profile.currency}${item.costPrice.toFixed(2)}</td>
+          <td class="px-4 py-3 text-center">
+            <div class="inline-flex items-center border border-slate-200 rounded-lg bg-white shadow-2xs overflow-hidden">
+              <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
+              <input type="number" id="poQtyInput_po_${item.sku}" min="0" step="1" value="${qty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
+              <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
             </div>
-            <span class="text-[11px] text-slate-400">Lead time: ${supplier.leadTime} days &bull; ${supplier.phone}</span>
-          </div>
-          <span class="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md">
-            ${StockPulse.profile.currency}${totalOrderCost.toLocaleString('en-IN')}
-          </span>
-        </div>
+          </td>
+          <td class="px-4 py-3 text-right font-mono font-bold text-slate-900">
+            ${StockPulse.profile.currency}${lineCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
 
-        <div class="space-y-1.5 my-3 text-xs border-y border-slate-100 py-2.5">
-          ${itemsNeedingPO.length > 0 ? itemsNeedingPO.map(i => `
-            <div class="flex items-center justify-between text-slate-600">
-              <span class="truncate max-w-[180px]">${i.name}</span>
-              <span class="font-mono text-slate-900 font-semibold">+${i.recommendedPOQty} units (${StockPulse.profile.currency}${i.recommendedPOCost.toLocaleString('en-IN')})</span>
-            </div>
-          `).join('') : '<p class="text-slate-400 text-center py-2">Stock levels optimal. No reorder required.</p>'}
-        </div>
-
-        <div class="flex items-center justify-between pt-2">
-          <span class="text-[11px] text-slate-400">${itemsNeedingPO.length} recommended SKU${itemsNeedingPO.length === 1 ? '' : 's'}</span>
-          <div class="flex items-center gap-2">
-            <button onclick="sendPOViaWhatsApp('${supplier.name}')" ${itemsNeedingPO.length === 0 ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#25D366] hover:bg-[#1da851] disabled:opacity-40 disabled:pointer-events-none transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Send WhatsApp order to ${supplier.name}">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/></svg>
-              <span>WhatsApp</span>
-            </button>
-            <button onclick="openPOModalForSupplier('${supplier.name}')" ${itemsNeedingPO.length === 0 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer">
-              Generate PO Draft
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  container.innerHTML = supplierCards;
+  if (countEl) countEl.textContent = `${orderList.length} SKUs`;
+  if (unitsEl) unitsEl.textContent = `${totalUnits.toLocaleString('en-IN')} units`;
+  if (costEl) costEl.textContent = `${StockPulse.profile.currency}${totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (leadEl) leadEl.textContent = `3 - 4 Days`;
+  if (legacyContainer) legacyContainer.innerHTML = '';
+  if (window.lucide) window.lucide.createIcons();
 }
 
+window.renderUnifiedPurchaseOrder = renderVendorPOGroups;
 // ----------------------------------------------------------------------------
 // Interactive Charts
 // ----------------------------------------------------------------------------
@@ -2342,7 +2349,7 @@ window.downloadPOExcel = async function() {
 // Purchase Order Generation & Export (Step 6)
 // ============================================================================
 
-window.openPOModal = function(supplierName = null) {
+window.openPOModal = function() {
   const modal = document.getElementById('poPreviewModal');
   if (!modal) return;
 
@@ -2352,62 +2359,27 @@ window.openPOModal = function(supplierName = null) {
     return;
   }
 
-  let supplierItems = [];
-  let vendorName = '';
-  let vendorPhone = '+91-98000-11111';
-  let leadDays = StockPulse.profile.defaultLeadTimeDays || 3;
-
-  if (supplierName && supplierName !== 'all') {
-    // Specific supplier requested
-    supplierItems = health.enriched.filter(i => i.supplier === supplierName && (i.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(i.sku)));
-    if (supplierItems.length === 0) {
-      supplierItems = health.enriched.filter(i => i.supplier === supplierName && (i.currentStock === 0 || i.currentStock <= i.reorderPoint));
-    }
-    if (supplierItems.length === 0) {
-      supplierItems = health.enriched.filter(i => i.supplier === supplierName).slice(0, 25);
-    }
-    vendorName = supplierName;
-    if (supplierItems[0]) {
-      vendorPhone = supplierItems[0].supplierPhone || vendorPhone;
-      leadDays = supplierItems[0].leadTimeDays || leadDays;
-    }
-  } else {
-    // Consolidated / Quick PO Draft from top header
-    supplierItems = health.enriched.filter(i => i.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(i.sku));
-    if (supplierItems.length === 0) {
-      supplierItems = health.enriched.filter(i => i.currentStock === 0 || i.currentStock <= i.reorderPoint);
-    }
-    if (supplierItems.length === 0) {
-      supplierItems = health.enriched.slice(0, 25);
-    }
-
-    const uniqueSuppliers = [...new Set(supplierItems.map(i => i.supplier))];
-    if (uniqueSuppliers.length === 1) {
-      vendorName = uniqueSuppliers[0];
-      vendorPhone = supplierItems[0].supplierPhone || vendorPhone;
-      leadDays = supplierItems[0].leadTimeDays || leadDays;
-    } else {
-      vendorName = `${StockPulse.profile.storeName} - Restock PO`;
-      vendorPhone = `${uniqueSuppliers.length} Vendors Grouped`;
-      leadDays = Math.max(...supplierItems.map(i => i.leadTimeDays || 3));
-    }
-  }
-
+  // Unified items requiring replenishment across the entire store (no categorization)
+  let supplierItems = health.enriched.filter(i => {
+    if (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0) return false;
+    return i.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(i.sku);
+  });
   if (supplierItems.length === 0) {
-    showToast('No items currently require replenishment.', 'info');
-    return;
+    supplierItems = health.enriched.filter(i => i.currentStock === 0 || i.currentStock <= i.reorderPoint);
   }
+  if (supplierItems.length === 0) {
+    supplierItems = health.enriched.slice(0, 25);
+  }
+
+  const vendorName = 'Central Wholesale Distributor';
+  const vendorPhone = 'Pariwar Supermarket Order Desk';
+  const leadDays = StockPulse.profile.defaultLeadTimeDays || 4;
 
   const poNumber = `PO-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(100 + Math.random() * 900)}`;
   const poDate = new Date().toISOString().slice(0, 10);
   const expDelivery = new Date(Date.now() + leadDays * 86400000).toISOString().slice(0, 10);
 
-  // Filter out any items with custom 0 quantity
-  const activeItems = supplierItems.filter(item => {
-    if (StockPulse.customPOQty && StockPulse.customPOQty[item.sku] === 0) return false;
-    return item.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(item.sku);
-  });
-  const itemsToOrder = activeItems.length > 0 ? activeItems : supplierItems.filter(i => (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0 ? false : true));
+  const itemsToOrder = supplierItems;
 
   // Save full item data so downloadPOExcel can access currentStock etc.
   StockPulse.lastPOItems = itemsToOrder.map(item => {
@@ -2426,7 +2398,7 @@ window.openPOModal = function(supplierName = null) {
         <td class="py-2.5 font-mono text-slate-500">${idx + 1}</td>
         <td class="py-2.5">
           <div class="font-semibold text-slate-900">${item.name}</div>
-          <div class="text-[11px] text-slate-400 font-mono">${item.sku} &bull; ${item.supplier}</div>
+          <div class="text-[11px] text-slate-400 font-mono">SKU: ${item.sku}</div>
         </td>
         <td class="py-2.5 text-center font-mono font-bold text-slate-800">${qty}</td>
         <td class="py-2.5 text-center font-mono text-slate-600">${item.currentStock ?? 0}</td>
@@ -2453,7 +2425,7 @@ window.openPOModal = function(supplierName = null) {
   // Setup WhatsApp share button in modal
   const waBtn = document.getElementById('poWhatsAppBtn');
   if (waBtn) {
-    waBtn.onclick = () => window.sendPOViaWhatsApp(vendorName);
+    waBtn.onclick = () => window.sendPOViaWhatsApp();
   }
 
   // Setup Print button
@@ -2466,52 +2438,28 @@ window.openPOModal = function(supplierName = null) {
   modal.classList.add('flex');
 };
 
-window.openPOModalForSupplier = function(supplierName) {
-  return window.openPOModal(supplierName);
+window.openPOModalForSupplier = function() {
+  return window.openPOModal();
 };
 
-window.sendPOViaWhatsApp = function(supplierName = null) {
+window.sendPOViaWhatsApp = function() {
   const health = computeAggregateHealth();
   if (!health.enriched || health.enriched.length === 0) {
     showToast('No inventory data loaded. Please upload sales data first.', 'info');
     return;
   }
 
-  let chosenSupplier = supplierName;
-  if (!chosenSupplier) {
-    const modalVendor = document.getElementById('poModalVendorName')?.textContent?.trim();
-    if (modalVendor && modalVendor !== '---' && modalVendor !== 'All Suppliers') {
-      chosenSupplier = modalVendor;
-    }
-  }
-
-  if (!chosenSupplier) {
-    const suppliersMap = {};
-    health.enriched.forEach(item => {
-      if (!suppliersMap[item.supplier]) {
-        suppliersMap[item.supplier] = { name: item.supplier, totalCost: 0, count: 0 };
-      }
-      if (item.recommendedPOQty > 0) {
-        suppliersMap[item.supplier].totalCost += item.recommendedPOCost;
-        suppliersMap[item.supplier].count++;
-      }
-    });
-
-    const activeSuppliers = Object.values(suppliersMap).filter(s => s.count > 0);
-    if (activeSuppliers.length > 0) {
-      activeSuppliers.sort((a, b) => b.totalCost - a.totalCost);
-      chosenSupplier = activeSuppliers[0].name;
-    } else {
-      chosenSupplier = health.enriched[0].supplier;
-    }
-  }
-
-  const supplierItems = health.enriched.filter(i => i.supplier === chosenSupplier);
-  const itemsNeedingPO = supplierItems.filter(i => i.recommendedPOQty > 0);
-  const orderList = itemsNeedingPO.length > 0 ? itemsNeedingPO : supplierItems.slice(0, 5);
+  // Unified items needing restock across the entire store (no categorization)
+  const activeItems = health.enriched.filter(item => {
+    if (StockPulse.customPOQty && StockPulse.customPOQty[item.sku] === 0) return false;
+    return item.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(item.sku);
+  });
+  const orderList = activeItems.length > 0 
+    ? activeItems 
+    : health.enriched.filter(i => (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0 ? false : true)).slice(0, 20);
 
   const poDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const leadDays = supplierItems[0]?.leadTimeDays || StockPulse.profile.defaultLeadTimeDays || 4;
+  const leadDays = StockPulse.profile.defaultLeadTimeDays || 4;
   const deliveryDate = new Date(Date.now() + leadDays * 86400000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -2519,17 +2467,14 @@ window.sendPOViaWhatsApp = function(supplierName = null) {
   const itemsText = orderList.map((item, idx) => {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
     totalUnits += qty;
-    return `${idx + 1}. *${item.name}* (${item.sku})\n   Quantity: ${qty} units`;
+    return `${idx + 1}. *${item.name}* (${item.sku})
+   Quantity: ${qty} units`;
   }).join('\n');
-
-  const vendorPhone = supplierItems[0]?.supplierPhone || '';
-  const cleanPhone = vendorPhone.replace(/[^0-9]/g, '');
 
   const msg = 
 `*PURCHASE ORDER: ${poNumber}*
 *Store:* ${StockPulse.profile.storeName}
 *Date:* ${poDate}
-*Vendor:* ${chosenSupplier}
 *Expected Delivery:* ${deliveryDate} (${leadDays} days lead time)
 
 *Items Ordered:*
@@ -2542,15 +2487,12 @@ ${itemsText}
 _Generated via StockPulse AI Retail Engine_
 Please confirm order receipt and shipping schedule. Thank you!`;
 
-  const waUrl = cleanPhone 
-    ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`
-    : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
 
   window.open(waUrl, '_blank');
-  showToast(`Opening WhatsApp order draft for ${chosenSupplier}...`, 'success');
+  showToast('Opening WhatsApp order draft for all restock items...', 'success');
 
-  // Also display visual modal for this supplier
-  window.openPOModal(chosenSupplier);
+  window.openPOModal();
 };
 
 // ============================================================================
