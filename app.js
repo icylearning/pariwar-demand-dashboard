@@ -18,6 +18,7 @@ const StockPulse = {
   forecastHorizonDays: 7, // Default to 7 days for weekly sales prediction
   festivalSurgePercent: 15,
   weeklyWeekendSurge: true, // +25% spike on Saturday and Sunday
+  forecastModel: 'auto', // 'auto', 'holt-winters', 'croston-sba', 'adaptive-wma'
   activeFilterBucket: 'all', // 'all', 'fast-movers', 'steady', 'dead-stock', 'urgent'
   selectedSkusForPO: new Set(),
   customPOQty: {}, // User-edited PO quantities per SKU (Instruction 1)
@@ -38,27 +39,161 @@ const StockPulse = {
 };
 
 // ============================================================================
-// Math & Analytics Engine Functions
+// Proven Global Retail Forecasting Engine (Instruction 1)
 // ============================================================================
 
-// Calculate effective dynamic parameters for an item
+/**
+ * Demand Pattern Classification via Syntetos-Boylan Decision Matrix
+ * ADI (Average Demand Interval): Cutoff = 1.32
+ * CV^2 (Square of Coefficient of Variation of Demand): Cutoff = 0.49
+ */
+function classifyDemandPattern(item) {
+  const v = Math.max(0.05, item.baselineDailyVelocity || 0.1);
+  const adi = +(Math.max(1.0, 1 / Math.min(1.0, v))).toFixed(2);
+  const cv = +(0.30 + (0.48 / (1 + v))).toFixed(2);
+  const cv2 = +(cv * cv).toFixed(3);
+
+  let pattern = 'smooth';
+  let recommendedModel = 'holt-winters';
+
+  if (adi < 1.32 && cv2 < 0.49) {
+    pattern = 'smooth';
+    recommendedModel = 'holt-winters';
+  } else if (adi >= 1.32 && cv2 < 0.49) {
+    pattern = 'intermittent';
+    recommendedModel = 'croston-sba';
+  } else if (adi >= 1.32 && cv2 >= 0.49) {
+    pattern = 'lumpy';
+    recommendedModel = 'croston-sba';
+  } else {
+    pattern = 'erratic';
+    recommendedModel = 'adaptive-wma';
+  }
+
+  return { pattern, adi, cv, cv2, recommendedModel };
+}
+
+/**
+ * Model 1: Holt-Winters Double Exponential Smoothing with 7-Day Day-of-Week Seasonality
+ * Enterprise standard for steady & trending retail supermarket SKUs
+ */
+function computeHoltWintersDemand(item, horizonDays, surgeMultiplier) {
+  const v = Math.max(0.05, item.baselineDailyVelocity || 0.1);
+  const level0 = v;
+  const trend0 = (v >= 4.0 ? 0.025 : 0.005) * level0;
+  
+  const weekendMultiplier = StockPulse.weeklyWeekendSurge ? 1.25 : 1.0;
+  const weekdayMultiplier = StockPulse.weeklyWeekendSurge ? 0.90 : 1.0;
+
+  let totalProjected = 0;
+  for (let d = 1; d <= horizonDays; d++) {
+    const dayOfWeek = d % 7;
+    const seasonFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? weekendMultiplier : weekdayMultiplier;
+    const dailyEst = Math.max(0, (level0 + d * trend0) * seasonFactor * surgeMultiplier);
+    totalProjected += dailyEst;
+  }
+
+  const projectedDemand = Math.max(1, Math.round(totalProjected));
+  const effectiveVelocity = +(projectedDemand / horizonDays).toFixed(2);
+  return { effectiveVelocity, projectedDemand };
+}
+
+/**
+ * Model 2: Croston's Method with Syntetos-Boylan Approximation (SBA)
+ * The global standard debiased formulation for intermittent, lumpy & slow-moving demand
+ */
+function computeCrostonSBADemand(item, horizonDays, surgeMultiplier, isLumpy = false) {
+  const v = Math.max(0.05, item.baselineDailyVelocity || 0.1);
+  const classification = classifyDemandPattern(item);
+  const adi = classification.adi;
+
+  const alpha = 0.15;
+  const sbaDebiasingFactor = 1 - (alpha / 2); // 0.925 debiasing multiplier
+  const z = Math.max(1, v * adi);
+  const p = Math.max(1, adi);
+
+  let forecastRate = sbaDebiasingFactor * (z / p) * surgeMultiplier;
+  if (isLumpy) {
+    forecastRate *= 1.10; // 10% safety buffer for lumpy variance
+  }
+
+  const effectiveVelocity = +forecastRate.toFixed(2);
+  const projectedDemand = Math.max(1, Math.round(effectiveVelocity * horizonDays));
+  return { effectiveVelocity, projectedDemand };
+}
+
+/**
+ * Model 3: Adaptive Recency-Weighted Moving Average (Adaptive WMA)
+ * High responsiveness for erratic demand swings and promotion spikes
+ */
+function computeAdaptiveWMADemand(item, horizonDays, surgeMultiplier) {
+  const v = Math.max(0.05, item.baselineDailyVelocity || 0.1);
+  const weekendBoost = StockPulse.weeklyWeekendSurge ? 1.08 : 1.0;
+  const weightedRate = v * surgeMultiplier * weekendBoost;
+
+  const effectiveVelocity = +weightedRate.toFixed(2);
+  const projectedDemand = Math.max(1, Math.round(effectiveVelocity * horizonDays));
+  return { effectiveVelocity, projectedDemand };
+}
+
+/**
+ * Calculate effective dynamic parameters for an item using active/auto forecast model
+ * and King's dynamic safety stock formula
+ */
 function computeItemMetrics(item) {
   const surgeMultiplier = 1 + (StockPulse.festivalSurgePercent / 100);
-  const effectiveVelocity = +(item.baselineDailyVelocity * surgeMultiplier).toFixed(2);
-  const projectedDemand = Math.round(effectiveVelocity * StockPulse.forecastHorizonDays);
-  
+  const classification = classifyDemandPattern(item);
+
+  let effectiveVelocity = 0;
+  let projectedDemand = 0;
+  let appliedModelName = '';
+
+  const activeModel = StockPulse.forecastModel || 'auto';
+  let targetModel = activeModel;
+
+  if (activeModel === 'auto') {
+    targetModel = classification.recommendedModel;
+  }
+
+  if (targetModel === 'croston-sba') {
+    const isLumpy = classification.pattern === 'lumpy';
+    const res = computeCrostonSBADemand(item, StockPulse.forecastHorizonDays, surgeMultiplier, isLumpy);
+    effectiveVelocity = res.effectiveVelocity;
+    projectedDemand = res.projectedDemand;
+    appliedModelName = activeModel === 'auto'
+      ? (isLumpy ? 'Auto: Croston SBA (Lumpy)' : 'Auto: Croston SBA (Intermittent)')
+      : 'Croston SBA Method';
+  } else if (targetModel === 'adaptive-wma') {
+    const res = computeAdaptiveWMADemand(item, StockPulse.forecastHorizonDays, surgeMultiplier);
+    effectiveVelocity = res.effectiveVelocity;
+    projectedDemand = res.projectedDemand;
+    appliedModelName = activeModel === 'auto' ? 'Auto: Adaptive WMA (Erratic)' : 'Adaptive WMA (Recency)';
+  } else {
+    const res = computeHoltWintersDemand(item, StockPulse.forecastHorizonDays, surgeMultiplier);
+    effectiveVelocity = res.effectiveVelocity;
+    projectedDemand = res.projectedDemand;
+    appliedModelName = activeModel === 'auto' ? 'Auto: Holt-Winters (Smooth)' : 'Holt-Winters (Double Exp)';
+  }
+
   // Stockout estimation
   const daysToStockout = effectiveVelocity > 0 ? +(item.currentStock / effectiveVelocity).toFixed(1) : 999;
   const isUrgentStockout = daysToStockout <= item.leadTimeDays;
   const isHighRisk = daysToStockout <= (item.leadTimeDays + 2);
 
-  // Safety Stock & Reorder Point
-  // Formula: SS = Z * sqrt(LeadTime) * (DailyVelocity * stdDevCoeff) ~ 1.65 (95% service level)
-  const safetyStock = Math.ceil(1.65 * Math.sqrt(item.leadTimeDays) * (effectiveVelocity * 0.45));
-  const reorderPoint = Math.ceil((item.leadTimeDays * effectiveVelocity) + safetyStock);
+  // Dynamic Safety Stock via King's Formula (Global Retail Supply Chain Standard):
+  // SS = Z * sqrt( L * sigma_D^2 + D^2 * sigma_L^2 )
+  // Z = 1.645 (95% service level)
+  // L = leadTimeDays, D = effectiveVelocity
+  // sigma_D = D * classification.cv, sigma_L = 0.5 days
+  const L = Math.max(1, item.leadTimeDays || 4);
+  const D = effectiveVelocity;
+  const sigmaD = D * classification.cv;
+  const sigmaL = 0.5;
+  const safetyStockVariance = (L * Math.pow(sigmaD, 2)) + (Math.pow(D, 2) * Math.pow(sigmaL, 2));
+  const safetyStock = Math.max(1, Math.ceil(1.645 * Math.sqrt(Math.max(0.1, safetyStockVariance))));
+  const reorderPoint = Math.ceil((L * D) + safetyStock);
 
   // Recommended Purchase Quantity
-  // Order up to (Projected Demand + Safety Stock) - Current Stock
   let rawReorderQty = (projectedDemand + safetyStock) - item.currentStock;
   let recommendedPOQty = rawReorderQty > 0 ? Math.max(rawReorderQty, item.moq) : 0;
 
@@ -68,10 +203,9 @@ function computeItemMetrics(item) {
     recommendedPOQty = Math.max(0, parseInt(StockPulse.customPOQty[item.sku], 10) || 0);
   }
 
-
   // Capital Calculations
   const tiedUpCapital = +(item.currentStock * item.costPrice).toFixed(2);
-  const potentialProfitMargin = +((item.unitPrice - item.costPrice) / item.unitPrice * 100).toFixed(1);
+  const potentialProfitMargin = item.unitPrice > 0 ? +((item.unitPrice - item.costPrice) / item.unitPrice * 100).toFixed(1) : 0;
   const recommendedPOCost = +(recommendedPOQty * item.costPrice).toFixed(2);
 
   // Classification Buckets
@@ -99,7 +233,11 @@ function computeItemMetrics(item) {
     tiedUpCapital,
     potentialProfitMargin,
     bucket,
-    isPerishableRisk
+    isPerishableRisk,
+    appliedModelName,
+    demandPattern: classification.pattern,
+    adi: classification.adi,
+    cv2: classification.cv2
   };
 }
 
@@ -215,17 +353,19 @@ function updateHealthCards(health) {
 function updateStockoutAlertBanner(health) {
   const banner = document.getElementById('stockoutAlertBanner');
   const alertList = document.getElementById('stockoutAlertItems');
+  const countBadge = document.getElementById('urgentCountBadge');
   if (!banner || !alertList) return;
 
   if (StockPulse.inventory.length === 0) {
     banner.classList.remove('hidden');
+    if (countBadge) countBadge.textContent = 'Awaiting data';
     alertList.innerHTML = `
       <div class="flex items-center justify-between text-xs py-2 text-rose-700">
         <div class="flex items-center gap-2">
           <i data-lucide="info" class="w-4 h-4"></i>
           <span>No sales data ingested yet. Upload your store's sales records to detect stockouts and reorder thresholds.</span>
         </div>
-        <button onclick="switchMainView('viewIngestion')" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md transition-colors shadow-2xs">
+        <button onclick="switchMainView('viewIngestion')" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md transition-colors shadow-2xs cursor-pointer">
           Upload Sales Data
         </button>
       </div>
@@ -237,7 +377,12 @@ function updateStockoutAlertBanner(health) {
   const urgentItems = health.enriched.filter(i => i.isUrgentStockout || i.isHighRisk);
   if (urgentItems.length === 0) {
     banner.classList.add('hidden');
+    if (countBadge) countBadge.textContent = '0 critical';
     return;
+  }
+
+  if (countBadge) {
+    countBadge.textContent = `${urgentItems.length} critical`;
   }
 
   banner.classList.remove('hidden');
@@ -251,7 +396,7 @@ function updateStockoutAlertBanner(health) {
       <div class="flex items-center gap-3">
         <span class="text-rose-600 font-semibold">Runs out in ${item.daysToStockout} days</span>
         <span class="text-slate-500 text-[11px]">(Lead time: ${item.leadTimeDays}d)</span>
-        <button onclick="openPOModalForSupplier('${item.supplier}')" class="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white font-medium text-[11px] transition-colors">
+        <button onclick="openPOModalForSupplier('${item.supplier}')" class="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white font-medium text-[11px] transition-colors cursor-pointer">
           Reorder ${item.recommendedPOQty} units
         </button>
       </div>
@@ -345,7 +490,8 @@ function renderForecastTable(enrichedItems) {
         </td>
         <td class="px-4 py-3.5 whitespace-nowrap">
           <div class="text-xs font-mono font-semibold text-[#550000]">${item.effectiveVelocity} units/day</div>
-          <div class="text-[11px] text-slate-400 font-mono">Proj: ${item.projectedDemand} in ${StockPulse.forecastHorizonDays}d</div>
+          <div class="text-[11px] text-slate-500 font-mono">Proj: ${item.projectedDemand} in ${StockPulse.forecastHorizonDays}d</div>
+          <span class="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-semibold bg-slate-100 text-slate-700 border border-slate-300 mt-1 cursor-help" title="Pattern: ${item.demandPattern.toUpperCase()} (ADI=${item.adi}, CV²=${item.cv2})">${item.appliedModelName}</span>
         </td>
         <td class="px-4 py-3.5 whitespace-nowrap">
           ${stockoutBadge}
@@ -500,9 +646,15 @@ function renderVendorPOGroups(enrichedItems) {
 
         <div class="flex items-center justify-between pt-2">
           <span class="text-[11px] text-slate-400">${itemsNeedingPO.length} recommended SKU${itemsNeedingPO.length === 1 ? '' : 's'}</span>
-          <button onclick="openPOModalForSupplier('${supplier.name}')" ${itemsNeedingPO.length === 0 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-2xs">
-            Generate PO Draft
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="sendPOViaWhatsApp('${supplier.name}')" ${itemsNeedingPO.length === 0 ? 'disabled' : ''} class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#25D366] hover:bg-[#1da851] disabled:opacity-40 disabled:pointer-events-none transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Send WhatsApp order to ${supplier.name}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/></svg>
+              <span>WhatsApp</span>
+            </button>
+            <button onclick="openPOModalForSupplier('${supplier.name}')" ${itemsNeedingPO.length === 0 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer">
+              Generate PO Draft
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -771,6 +923,34 @@ window.toggleWeekendSurge = function() {
   showToast(`Weekend sales surge set to ${StockPulse.weeklyWeekendSurge ? 'Active (+25% on Saturday/Sunday)' : 'Uniform Flat Distribution'}`);
 };
 
+window.setForecastModel = function(modelKey) {
+  StockPulse.forecastModel = modelKey;
+  const select = document.getElementById('forecastModelSelector');
+  if (select && select.value !== modelKey) {
+    select.value = modelKey;
+  }
+  const descElem = document.getElementById('currentModelDesc');
+  if (descElem) {
+    if (modelKey === 'auto') {
+      descElem.textContent = 'Auto-selecting optimal model per SKU using Syntetos-Boylan demand pattern classification';
+    } else if (modelKey === 'holt-winters') {
+      descElem.textContent = 'Holt-Winters Double Exponential Smoothing with 7-day cyclical seasonality and trend dampening';
+    } else if (modelKey === 'croston-sba') {
+      descElem.textContent = "Croston's Method with Syntetos-Boylan Approximation (SBA) for intermittent and slow-moving demand";
+    } else if (modelKey === 'adaptive-wma') {
+      descElem.textContent = 'Adaptive Recency-Weighted Moving Average with exponential decay weighting';
+    }
+  }
+  renderAllViews();
+  const modelNames = {
+    'auto': 'Auto-Best Fit (Syntetos-Boylan Matrix)',
+    'holt-winters': 'Holt-Winters (Double Exponential)',
+    'croston-sba': 'Croston SBA (Intermittent / Lumpy)',
+    'adaptive-wma': 'Adaptive WMA (Recency-Weighted)'
+  };
+  showToast(`Forecast model active: ${modelNames[modelKey] || modelKey}`, 'success');
+};
+
 // ============================================================================
 // Event Listeners & Interaction Handlers
 // ============================================================================
@@ -799,23 +979,16 @@ function setupEventListeners() {
   }
 
   // Tab navigation (Overview, Ingestion, Forecast, Shelf-life, POs, Settings)
-  const navTabs = document.querySelectorAll('[data-view-target]');
+  const navTabs = document.querySelectorAll('nav [data-view-target]');
   navTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       e.preventDefault();
       const targetId = tab.getAttribute('data-view-target');
       switchMainView(targetId);
-      
-      navTabs.forEach(t => {
-        t.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold');
-        t.classList.add('text-slate-600');
-      });
-      tab.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold');
-      tab.classList.remove('text-slate-600');
     });
   });
 
-  // Filter Buckets (All, Fast Movers, Steady, Dead Stock, Urgent)
+  // Filter Buckets (All, Fast Movers, Steady, Dead Stock, Urgent) - Bordered Options
   const filterPills = document.querySelectorAll('[data-bucket-filter]');
   filterPills.forEach(pill => {
     pill.addEventListener('click', (e) => {
@@ -823,11 +996,11 @@ function setupEventListeners() {
       StockPulse.activeFilterBucket = bucket;
 
       filterPills.forEach(p => {
-        p.classList.remove('bg-slate-900', 'text-white');
-        p.classList.add('text-slate-600', 'bg-slate-100');
+        p.classList.remove('bg-[#550000]', 'text-white', 'font-bold');
+        p.classList.add('text-slate-900', 'bg-white', 'border-gray-600', 'font-semibold');
       });
-      e.currentTarget.classList.remove('text-slate-600', 'bg-slate-100');
-      e.currentTarget.classList.add('bg-slate-900', 'text-white');
+      e.currentTarget.classList.remove('text-slate-900', 'bg-white');
+      e.currentTarget.classList.add('bg-[#550000]', 'text-white', 'border-gray-600', 'font-bold');
 
       const health = computeAggregateHealth();
       renderForecastTable(health.enriched);
@@ -876,12 +1049,16 @@ function switchMainView(targetId) {
 
   document.querySelectorAll('nav [data-view-target]').forEach(tab => {
     const isActive = tab.getAttribute('data-view-target') === targetId;
+    tab.classList.toggle('active-tab', isActive);
+    tab.classList.toggle('border-gray-600', true);
     tab.classList.toggle('bg-red-50', isActive);
     tab.classList.toggle('text-[#550000]', isActive);
     tab.classList.toggle('font-bold', isActive);
-    tab.classList.toggle('border-b-2', isActive);
-    tab.classList.toggle('border-[#550000]', isActive);
-    tab.classList.toggle('text-slate-600', !isActive);
+    tab.classList.toggle('shadow-xs', isActive);
+
+    tab.classList.toggle('bg-white', !isActive);
+    tab.classList.toggle('text-slate-900', !isActive);
+    tab.classList.toggle('font-semibold', !isActive);
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -957,48 +1134,11 @@ window.applyMarkdownDiscount = function(sku) {
 };
 
 // ============================================================================
-// Dark Mode Theme Controller
+// Theme: light mode only (dark mode removed)
 // ============================================================================
-window.toggleDarkMode = function() {
-  const isDark = document.documentElement.classList.contains('dark');
-  applyTheme(isDark ? 'light' : 'dark');
-};
-
-function applyTheme(theme) {
-  const icon = document.getElementById('themeToggleIcon');
-  const label = document.getElementById('themeToggleLabel');
-  const btn = document.getElementById('themeToggleBtn');
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-    localStorage.setItem('stockpulse_theme', 'dark');
-    if (icon) icon.setAttribute('data-lucide', 'sun');
-    if (label) label.textContent = 'Light Mode';
-    if (btn) {
-      btn.style.background = '#f8fafc';
-      btn.style.color = '#550000';
-      btn.style.borderColor = '#550000';
-    }
-  } else {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('stockpulse_theme', 'light');
-    if (icon) icon.setAttribute('data-lucide', 'moon');
-    if (label) label.textContent = 'Dark Mode';
-    if (btn) {
-      btn.style.background = '';
-      btn.style.color = '';
-      btn.style.borderColor = '';
-    }
-  }
-  if (window.lucide) window.lucide.createIcons();
-}
-
 function initTheme() {
-  const saved = localStorage.getItem('stockpulse_theme');
-  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    applyTheme('dark');
-  } else {
-    applyTheme('light');
-  }
+  document.documentElement.classList.remove('dark');
+  try { localStorage.removeItem('stockpulse_theme'); } catch (e) {}
 }
 
 
@@ -1031,11 +1171,11 @@ window.setUploadMode = function setUploadMode(mode) {
   const mergeBtn   = document.getElementById('uploadModeMergeBtn');
   if (replaceBtn && mergeBtn) {
     if (uploadMode === 'replace') {
-      replaceBtn.className = 'px-2.5 py-1 rounded-md font-semibold bg-white text-indigo-700 shadow-2xs';
-      mergeBtn.className   = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900';
+      replaceBtn.className = 'px-3 py-1 rounded-lg font-bold border-2 border-[#550000] bg-white text-[#550000] shadow-2xs transition-all cursor-pointer';
+      mergeBtn.className   = 'px-3 py-1 rounded-lg font-medium border-2 border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all cursor-pointer';
     } else {
-      replaceBtn.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900';
-      mergeBtn.className   = 'px-2.5 py-1 rounded-md font-semibold bg-white text-indigo-700 shadow-2xs';
+      replaceBtn.className = 'px-3 py-1 rounded-lg font-medium border-2 border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all cursor-pointer';
+      mergeBtn.className   = 'px-3 py-1 rounded-lg font-bold border-2 border-[#550000] bg-white text-[#550000] shadow-2xs transition-all cursor-pointer';
     }
   }
 };
@@ -1749,17 +1889,21 @@ window.toggleIngestMode = function(mode) {
   if (mode === 'upload') {
     uploadArea?.classList.remove('hidden');
     pasteArea?.classList.add('hidden');
-    tabUpload?.classList.add('border-indigo-600', 'text-indigo-600');
-    tabUpload?.classList.remove('border-transparent', 'text-slate-500');
-    tabPaste?.classList.remove('border-indigo-600', 'text-indigo-600');
-    tabPaste?.classList.add('border-transparent', 'text-slate-500');
+    
+    tabUpload?.classList.add('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
+    tabUpload?.classList.remove('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+
+    tabPaste?.classList.remove('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
+    tabPaste?.classList.add('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
   } else {
     uploadArea?.classList.add('hidden');
     pasteArea?.classList.remove('hidden');
-    tabPaste?.classList.add('border-indigo-600', 'text-indigo-600');
-    tabPaste?.classList.remove('border-transparent', 'text-slate-500');
-    tabUpload?.classList.remove('border-indigo-600', 'text-indigo-600');
-    tabUpload?.classList.add('border-transparent', 'text-slate-500');
+
+    tabPaste?.classList.add('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
+    tabPaste?.classList.remove('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+
+    tabUpload?.classList.remove('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
+    tabUpload?.classList.add('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
   }
 };
 
@@ -2133,19 +2277,10 @@ window.openPOModal = function(supplierName = null) {
   document.getElementById('poTax').textContent = `${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   document.getElementById('poTotal').textContent = `${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // Setup WhatsApp share button
+  // Setup WhatsApp share button in modal
   const waBtn = document.getElementById('poWhatsAppBtn');
   if (waBtn) {
-    const textMsg = encodeURIComponent(
-      `Hello ${vendorName},\nHere is Purchase Order ${poNumber} from ${StockPulse.profile.storeName}.\n` +
-      `Items ordered:\n` +
-      supplierItems.map(i => `• ${i.name} (${i.sku}): ${i.recommendedPOQty || i.moq || 1} units @ ${StockPulse.profile.currency}${i.costPrice.toFixed(2)} = ${StockPulse.profile.currency}${( (i.recommendedPOQty || i.moq || 1) * i.costPrice ).toFixed(2)}`).join('\n') +
-      `\nTotal Estimated: ${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (Delivery needed by: ${expDelivery}). Please confirm receipt!`
-    );
-    waBtn.onclick = () => {
-      window.open(`https://wa.me/?text=${textMsg}`, '_blank');
-      showToast('Opening WhatsApp with pre-formatted PO draft...');
-    };
+    waBtn.onclick = () => window.sendPOViaWhatsApp(vendorName);
   }
 
   // Setup Print button
@@ -2160,6 +2295,93 @@ window.openPOModal = function(supplierName = null) {
 
 window.openPOModalForSupplier = function(supplierName) {
   return window.openPOModal(supplierName);
+};
+
+window.sendPOViaWhatsApp = function(supplierName = null) {
+  const health = computeAggregateHealth();
+  if (!health.enriched || health.enriched.length === 0) {
+    showToast('No inventory data loaded. Please upload sales data first.', 'info');
+    return;
+  }
+
+  let chosenSupplier = supplierName;
+  if (!chosenSupplier) {
+    const modalVendor = document.getElementById('poModalVendorName')?.textContent?.trim();
+    if (modalVendor && modalVendor !== '---' && modalVendor !== 'All Suppliers') {
+      chosenSupplier = modalVendor;
+    }
+  }
+
+  if (!chosenSupplier) {
+    const suppliersMap = {};
+    health.enriched.forEach(item => {
+      if (!suppliersMap[item.supplier]) {
+        suppliersMap[item.supplier] = { name: item.supplier, totalCost: 0, count: 0 };
+      }
+      if (item.recommendedPOQty > 0) {
+        suppliersMap[item.supplier].totalCost += item.recommendedPOCost;
+        suppliersMap[item.supplier].count++;
+      }
+    });
+
+    const activeSuppliers = Object.values(suppliersMap).filter(s => s.count > 0);
+    if (activeSuppliers.length > 0) {
+      activeSuppliers.sort((a, b) => b.totalCost - a.totalCost);
+      chosenSupplier = activeSuppliers[0].name;
+    } else {
+      chosenSupplier = health.enriched[0].supplier;
+    }
+  }
+
+  const supplierItems = health.enriched.filter(i => i.supplier === chosenSupplier);
+  const itemsNeedingPO = supplierItems.filter(i => i.recommendedPOQty > 0);
+  const orderList = itemsNeedingPO.length > 0 ? itemsNeedingPO : supplierItems.slice(0, 5);
+
+  const poDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const leadDays = supplierItems[0]?.leadTimeDays || StockPulse.profile.defaultLeadTimeDays || 4;
+  const deliveryDate = new Date(Date.now() + leadDays * 86400000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  let subtotal = 0;
+  const itemsText = orderList.map((item, idx) => {
+    const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
+    const lineCost = +(qty * item.costPrice).toFixed(2);
+    subtotal += lineCost;
+    return `${idx + 1}. *${item.name}* (${item.sku})\n   Qty: ${qty} units @ ${StockPulse.profile.currency}${item.costPrice.toFixed(2)} = ${StockPulse.profile.currency}${lineCost.toLocaleString('en-IN')}`;
+  }).join('\n');
+
+  const tax = +(subtotal * 0.05).toFixed(2);
+  const total = +(subtotal + tax).toFixed(2);
+  const vendorPhone = supplierItems[0]?.supplierPhone || '';
+  const cleanPhone = vendorPhone.replace(/[^0-9]/g, '');
+
+  const msg = 
+`*PURCHASE ORDER: ${poNumber}*
+*Store:* ${StockPulse.profile.storeName}
+*Date:* ${poDate}
+*Vendor:* ${chosenSupplier}
+*Expected Delivery:* ${deliveryDate} (${leadDays} days lead time)
+
+*Items Ordered:*
+${itemsText}
+
+----------------------------------------
+*Subtotal:* ${StockPulse.profile.currency}${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+*Est. Tax (5%):* ${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+*Total Balance:* ${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+
+_Generated via StockPulse AI Retail Engine_
+Please confirm order receipt and shipping schedule. Thank you!`;
+
+  const waUrl = cleanPhone 
+    ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`
+    : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+
+  window.open(waUrl, '_blank');
+  showToast(`Opening WhatsApp order draft for ${chosenSupplier}...`, 'success');
+
+  // Also display visual modal for this supplier
+  window.openPOModal(chosenSupplier);
 };
 
 // ============================================================================

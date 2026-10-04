@@ -240,178 +240,168 @@ input[type="range"]::-moz-range-track {
   }
 }
 
+
 /* ==========================================================================
-   Comprehensive Dark Mode System — High Contrast Edition
+   Border & Rounding System (dark grey borders, all boxes rounded)
    ========================================================================== */
-html.dark body {
-  background-color: #0b0f1a !important;
-  color: #f0f4ff !important;
+:root {
+  --box-border: #4b5563; /* dark grey */
 }
 
-html.dark header {
-  background-color: rgba(10, 14, 26, 0.97) !important;
-  border-color: #2d3a50 !important;
+/* Primary navigation tabs */
+.nav-tab-btn {
+  border: 2px solid var(--box-border) !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.18s ease-in-out;
+}
+.nav-tab-btn:not(.active-tab) {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+.nav-tab-btn:not(.active-tab):hover {
+  background-color: #f3f4f6 !important;
+  transform: translateY(-1px);
+}
+.nav-tab-btn.active-tab {
+  background-color: #fef2f2 !important;
+  color: #550000 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
 }
 
-html.dark .bg-white {
-  background-color: #131d2e !important;
-  border-color: #2d3a50 !important;
-  color: #eef2ff !important;
+/* Cards that already carry a border */
+.border-slate-200\/80,
+.border-slate-200\/70,
+.border-slate-300,
+.border-gray-600 {
+  border-color: var(--box-border) !important;
+}
+.border-slate-200\/80,
+.border-slate-200\/70 {
+  border-width: 2px !important;
 }
 
-html.dark .bg-slate-50,
-html.dark .bg-slate-50\/70,
-html.dark .bg-slate-50\/50,
-html.dark .bg-slate-50\/60 {
-  background-color: #0e1726 !important;
-  border-color: #253045 !important;
+/* Round every bordered box/card */
+.border,
+.border-2,
+[class*="border-slate-200"],
+.border-gray-600,
+.bg-white.shadow-2xs,
+.bg-white.shadow-sm,
+table {
+  border-radius: 0.75rem;
+}
+/* ...but never round single-side divider lines */
+.border-b, .border-b-2, .border-t, .border-t-2,
+.border-l, .border-r, tr, td, th {
+  border-radius: 0;
+}
+/* Keep pills and circles fully round */
+.rounded-full { border-radius: 9999px !important; }
+
+/* Filter pills and sub-tab / mode buttons */
+[data-bucket-filter],
+#tabModeUpload,
+#tabModePaste,
+#uploadModeReplaceBtn {
+  border: 2px solid var(--box-border) !important;
+  border-radius: 0.75rem !important;
+}
+#uploadModeMergeBtn { border-radius: 0.5rem !important; }
+
+/* Drop zone */
+#csvDropZone {
+  border: 2px dashed var(--box-border) !important;
+  border-radius: 1rem !important;
 }
 
-html.dark .bg-slate-100 {
-  background-color: #1a2840 !important;
-  border-color: #2d3a50 !important;
-  color: #c8d6f0 !important;
+/* Inputs, search boxes, dropdowns */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  border: 2px solid var(--box-border) !important;
+  border-radius: 0.5rem !important;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #550000 !important;
+  outline: none !important;
 }
 
-html.dark .border-slate-200,
-html.dark .border-slate-200\/80,
-html.dark .border-slate-200\/70,
-html.dark .border-slate-100 {
-  border-color: #253045 !important;
+/* ==========================================================================
+   Critical Stock Warnings Banner (Red Border - Instruction 3)
+   ========================================================================== */
+#stockoutAlertBanner {
+  border: 2px solid #ef4444 !important;
+  border-radius: 1rem !important;
+  background-color: #fff1f2 !important;
+  animation: alertPulseGlow 3.5s infinite ease-in-out;
 }
 
-html.dark .text-slate-900,
-html.dark .text-slate-800 {
-  color: #f0f4ff !important;
+@keyframes alertPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.08);
+  }
 }
 
-html.dark .text-slate-700,
-html.dark .text-slate-600 {
-  color: #b8cce8 !important;
+/* ==========================================================================
+   Smooth Micro-Animations (Instruction 6)
+   ========================================================================== */
+
+/* 1. Main View Section Transitions (smooth fade & lift) */
+[data-view-section]:not(.hidden) {
+  animation: viewFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-html.dark .text-slate-500,
-html.dark .text-slate-400 {
-  color: #7a9abf !important;
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Highlighted slider box in dark mode */
-html.dark .border-slate-700 {
-  border-color: #4a6080 !important;
+/* 2. Modal Pop-In Transitions */
+#poPreviewModal:not(.hidden) > div,
+#dataProcessingModal:not(.hidden) > div {
+  animation: modalEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Dark Mode Inputs & Controls */
-html.dark input[type="text"],
-html.dark input[type="number"],
-html.dark select,
-html.dark textarea {
-  background-color: #1a2840 !important;
-  border-color: #2d3a50 !important;
-  color: #f0f4ff !important;
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-html.dark input[type="text"]::placeholder,
-html.dark textarea::placeholder {
-  color: #4a6080 !important;
+/* 3. Subtle Button Press Feedback */
+button:active:not(:disabled) {
+  transform: scale(0.975);
+  transition: transform 0.08s ease;
 }
 
-/* Dark Mode Slider Overrides (High-contrast and easily seen) */
-html.dark input[type="range"] {
-  background: #2d4060 !important;
-  border-color: #3d5075 !important;
+/* 4. Table Row & Card Hover Transitions */
+tbody tr {
+  transition: background-color 0.15s ease;
 }
-
-html.dark input[type="range"]::-webkit-slider-thumb {
-  background: #ffffff !important; /* Bright white thumb on dark track */
-  border: 3px solid #131d2e !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+#vendorPOGroupsContainer > div {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-html.dark input[type="range"]::-webkit-slider-thumb:hover {
-  background: #ffffff !important;
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.2), 0 3px 10px rgba(0, 0, 0, 0.9) !important;
-}
-
-html.dark input[type="range"]::-moz-range-thumb {
-  background: #ffffff !important;
-  border: 3px solid #131d2e !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
-}
-
-html.dark input[type="range"]::-moz-range-track {
-  background: #2d4060 !important;
-  border-color: #3d5075 !important;
-}
-
-/* Dark Mode Table Rows & Modals */
-html.dark tr:hover {
-  background-color: rgba(30, 50, 75, 0.8) !important;
-}
-
-html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #253045 !important;
-}
-
-html.dark #poPrintArea {
-  background-color: #131d2e !important;
-  color: #f0f4ff !important;
-}
-
-html.dark .bg-red-50,
-html.dark .bg-red-50\/80,
-html.dark .bg-red-50\/50 {
-  background-color: #2a0f0f !important;
-  border-color: #5a1f1f !important;
-}
-
-html.dark #profileEditorDropdown {
-  background-color: #131d2e !important;
-  border-color: #253045 !important;
-}
-
-/* Dark mode: shadow areas and card surfaces */
-html.dark .shadow-2xs,
-html.dark .shadow-sm {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6) !important;
-}
-
-/* Dark mode: table borders */
-html.dark .border-slate-100 {
-  border-color: #253045 !important;
-}
-
-/* Dark mode: indigo accent overrides for legibility */
-html.dark .bg-indigo-50 {
-  background-color: #192540 !important;
-}
-html.dark .text-indigo-600,
-html.dark .text-indigo-700 {
-  color: #7eb3f0 !important;
-}
-html.dark .border-indigo-200\/60 {
-  border-color: #2d4a70 !important;
-}
-
-/* Dark mode: amber overrides */
-html.dark .bg-amber-50 {
-  background-color: #2a2000 !important;
-}
-html.dark .text-amber-700,
-html.dark .text-amber-800 {
-  color: #f0c840 !important;
-}
-
-/* Dark mode: emerald accent */
-html.dark .text-emerald-600,
-html.dark .text-emerald-700 {
-  color: #34d399 !important;
-}
-
-/* Dark mode: button surfaces */
-html.dark .bg-slate-200 {
-  background-color: #1a2840 !important;
-}
-html.dark .hover\:bg-slate-100:hover {
-  background-color: #1a2840 !important;
+#vendorPOGroupsContainer > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
 }
 

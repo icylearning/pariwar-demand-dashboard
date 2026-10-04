@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pariwar &bull; Demand Forecasting & Inventory Engine</title>
 
-  <!-- Prevent dark mode flicker on page load -->
+  <!-- Light mode only -->
   <script>
-    if (localStorage.getItem('stockpulse_theme') === 'dark' || (!('stockpulse_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.remove('dark');
   </script>
 
   <!-- Tailwind CSS CDN -->
@@ -96,7 +92,7 @@
   <div class="min-h-full flex flex-col">
 
     <!-- Top Global App Bar -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-2.5 transition-colors no-print">
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-2.5 transition-colors no-print">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
         
         <!-- Brand & Store Profiling Info -->
@@ -135,81 +131,31 @@
             <span class="sm:hidden">PO Draft</span>
           </button>
 
-          <!-- Dark Mode Toggle Button — always visible -->
-          <button id="themeToggleBtn" onclick="toggleDarkMode()" 
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-[#550000] bg-white text-[#550000] hover:bg-[#550000] hover:text-white transition-all text-xs font-semibold shadow-sm cursor-pointer"
-            title="Toggle Light / Dark Mode">
-            <i id="themeToggleIcon" data-lucide="moon" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline" id="themeToggleLabel">Dark Mode</span>
-          </button>
-
-          <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 sm:mx-1"></div>
-
-
-          <div class="relative flex items-center gap-2 pl-1" id="profileWidget">
-            <button onclick="toggleProfileEditor()" class="flex items-center gap-2 hover:bg-slate-100 rounded-lg px-2 py-1 transition-colors">
-              <div class="w-8 h-8 rounded-full bg-[#550000] text-white flex items-center justify-center font-bold text-sm" id="profileAvatar">P</div>
-              <div class="hidden lg:block text-left text-xs">
-                <span class="font-semibold text-slate-900 block leading-tight" id="profileNameDisplay">Store Manager</span>
-                <span class="text-[11px] text-slate-400" id="profileRoleDisplay">Admin</span>
-              </div>
-              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 hidden lg:block"></i>
-            </button>
-            <!-- Profile edit dropdown -->
-            <div id="profileEditorDropdown" class="hidden absolute right-0 top-10 z-50 bg-white rounded-xl shadow-lg border border-slate-200 p-4 w-56">
-              <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Edit Profile</p>
-              <div class="space-y-2">
-                <div>
-                  <label class="text-[11px] text-slate-500">Name</label>
-                  <input id="profileNameInput" type="text" placeholder="Your name" value="Store Manager"
-                    class="w-full mt-0.5 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#550000]">
-                </div>
-                <div>
-                  <label class="text-[11px] text-slate-500">Role</label>
-                  <input id="profileRoleInput" type="text" placeholder="Your role" value="Admin"
-                    class="w-full mt-0.5 px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#550000]">
-                </div>
-                <button onclick="saveProfileEdit()" class="w-full mt-1 px-3 py-1.5 text-xs font-semibold text-white bg-[#550000] hover:bg-[#420000] rounded-lg transition-colors">Save</button>
-              </div>
-            </div>
-          </div>
 
         </div>
 
       </div>
     </header>
 
-    <!-- Visual 5-Step Workflow Pipeline Stepper (Store Profiling removed) -->
-    <div class="bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-2 no-print overflow-x-auto scroll-touch">
-      <div class="max-w-7xl mx-auto flex items-center justify-between text-[11px] text-slate-500 gap-3 sm:gap-4 min-w-[580px]">
+    <!-- Visual Workflow Pipeline Stepper (Non-duplicated options only) -->
+    <div class="bg-white px-4 sm:px-6 lg:px-8 py-2.5 no-print overflow-x-auto scroll-touch">
+      <div class="max-w-7xl mx-auto flex items-center justify-start text-[11px] text-slate-500 gap-2 sm:gap-4 min-w-[500px]">
         
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer hover:text-[#550000]" data-view-target="viewIngestion">
+        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-gray-600 hover:bg-slate-100 px-3 py-1.5 rounded-xl bg-slate-50 transition-all shadow-2xs" data-view-target="viewIngestion">
           <span class="w-5 h-5 rounded-full bg-red-100 text-[#550000] font-bold flex items-center justify-center text-[10px]">1</span>
-          <span class="font-medium">Sales Upload &amp; Data Ingestion</span>
+          <span class="font-semibold text-slate-900">Sales Upload &amp; Data Ingestion</span>
         </div>
-        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 shrink-0"></i>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-600 shrink-0"></i>
 
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer hover:text-[#550000]" onclick="runSimulatedDataCleaning()">
+        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-gray-600 hover:bg-slate-100 px-3 py-1.5 rounded-xl bg-slate-50 transition-all shadow-2xs" onclick="runSimulatedDataCleaning()">
           <span class="w-5 h-5 rounded-full bg-red-100 text-[#550000] font-bold flex items-center justify-center text-[10px]">2</span>
-          <span class="font-medium">AI Cleaning &amp; Processing</span>
+          <span class="font-semibold text-slate-900">AI Cleaning &amp; Processing</span>
         </div>
-        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 shrink-0"></i>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-600 shrink-0"></i>
 
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer hover:text-[#550000]" data-view-target="viewForecast">
-          <span class="w-5 h-5 rounded-full bg-red-100 text-[#550000] font-bold flex items-center justify-center text-[10px]">3</span>
-          <span class="font-semibold text-[#550000]">Demand Forecast Review</span>
-        </div>
-        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 shrink-0"></i>
-
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer hover:text-[#550000]" data-view-target="viewOverview">
-          <span class="w-5 h-5 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-[10px]">4</span>
-          <span class="font-medium text-rose-600">Stockout Alerts &amp; Actions</span>
-        </div>
-        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 shrink-0"></i>
-
-        <div class="flex items-center gap-2 shrink-0 cursor-pointer hover:text-[#550000]" data-view-target="viewPurchaseOrders">
-          <span class="w-5 h-5 rounded-full bg-red-100 text-[#550000] font-bold flex items-center justify-center text-[10px]">5</span>
-          <span class="font-medium">PO Execution &amp; Export</span>
+        <div class="flex items-center gap-2 shrink-0 cursor-pointer border-2 border-red-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl bg-rose-50/70 transition-all shadow-2xs" data-view-target="viewOverview">
+          <span class="w-5 h-5 rounded-full bg-rose-200 text-rose-800 font-bold flex items-center justify-center text-[10px]">3</span>
+          <span class="font-semibold text-rose-700">Stockout Alerts &amp; Actions</span>
         </div>
 
       </div>
@@ -219,22 +165,22 @@
     <!-- Main Container Layout with Sub-Navigation Tabs -->
     <div class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
       
-      <!-- Primary Navigation Tabs -->
-      <div class="flex items-center justify-between border-b border-slate-200 no-print overflow-x-auto scroll-touch">
-        <nav class="flex space-x-1 sm:space-x-3 text-xs pb-px whitespace-nowrap min-w-max">
-          <button data-view-target="viewOverview" class="px-3.5 py-2.5 rounded-lg bg-red-50 text-[#550000] font-bold border-b-2 border-[#550000] transition-colors flex items-center gap-2 shrink-0">
+      <!-- Primary Navigation Tabs (Black Bordered Options) -->
+      <div class="p-1.5 sm:p-2 rounded-2xl bg-slate-100/90 dark:bg-slate-900/80 border-2 border-gray-600 dark:border-slate-700 no-print overflow-x-auto scroll-touch shadow-xs">
+        <nav class="flex space-x-2 text-xs whitespace-nowrap min-w-max">
+          <button data-view-target="viewOverview" class="nav-tab-btn active-tab px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-red-50 text-[#550000] font-bold shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             Health Dashboard
           </button>
-          <button data-view-target="viewIngestion" class="px-3.5 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 shrink-0">
+          <button data-view-target="viewIngestion" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
             Data Ingestion &amp; Mapping
           </button>
-          <button data-view-target="viewForecast" class="px-3.5 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 shrink-0">
+          <button data-view-target="viewForecast" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
             Demand Forecast &amp; Sliders
           </button>
-          <button data-view-target="viewPurchaseOrders" class="px-3.5 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-2 shrink-0">
+          <button data-view-target="viewPurchaseOrders" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
             <i data-lucide="package-check" class="w-4 h-4"></i>
             Purchase Orders (POs)
           </button>
@@ -248,8 +194,8 @@
       <!-- ================================================================== -->
       <section id="viewOverview" data-view-section class="space-y-6">
         
-        <!-- Urgent Stockout Risk Alert Banner (Step 5 Alert) -->
-        <div id="stockoutAlertBanner" class="p-4 rounded-xl bg-rose-50 border border-rose-200/80 shadow-2xs">
+        <!-- Urgent Stockout Risk Alert Banner (Red Bordered) -->
+        <div id="stockoutAlertBanner" class="p-4 rounded-2xl bg-rose-50 border-2 border-red-500 shadow-sm transition-all">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-rose-600 pulse-dot"></span>
@@ -324,15 +270,15 @@
       <!-- ================================================================== -->
       <section id="viewIngestion" data-view-section class="hidden space-y-6">
         
-        <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-2xs">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border-2 border-gray-600 dark:border-slate-700 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b-2 border-gray-600 dark:border-slate-800">
             <div>
-              <h2 class="text-base font-bold text-slate-900">Step 2: Sales Data Upload & Validation</h2>
-              <p class="text-xs text-slate-500">Drop your POS sales exports (CSV/XLSX) or connect directly to billing platforms.</p>
+              <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Step 2: Sales Data Upload &amp; Validation</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Drop your POS sales exports (CSV/XLSX) or connect directly to billing platforms.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-2">
-              <button onclick="clearAllIngestedData()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors">
+              <button onclick="clearAllIngestedData()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border-2 border-gray-600 dark:border-rose-800 rounded-xl transition-all shadow-2xs cursor-pointer">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 Clear Uploaded Excel
               </button>
@@ -340,27 +286,27 @@
           </div>
 
 
-          <!-- Ingestion Mode Tabs (File Upload vs Direct Paste) -->
-          <div class="mt-6 border-b border-slate-200 flex items-center justify-between text-xs font-semibold">
-            <div class="flex items-center gap-4">
-              <button id="tabModeUpload" onclick="toggleIngestMode('upload')" class="pb-2.5 border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+          <!-- Ingestion Mode Tabs (Black Bordered Option Buttons) -->
+          <div class="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold">
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="tabModeUpload" onclick="toggleIngestMode('upload')" class="px-3.5 py-2 rounded-xl border-2 border-gray-600 bg-red-50 text-[#550000] font-bold shadow-2xs flex items-center gap-2 transition-all cursor-pointer">
                 <i data-lucide="file-up" class="w-4 h-4"></i>
                 Upload Excel / CSV Files
               </button>
-              <button id="tabModePaste" onclick="toggleIngestMode('paste')" class="pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+              <button id="tabModePaste" onclick="toggleIngestMode('paste')" class="px-3.5 py-2 rounded-xl border-2 border-gray-600 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-300 hover:bg-slate-50 font-semibold flex items-center gap-2 transition-all cursor-pointer">
                 <i data-lucide="clipboard-paste" class="w-4 h-4"></i>
                 Paste Sales Report Text (from Excel / Tally)
               </button>
             </div>
 
-            <!-- Upload Combination Mode (Replace vs Merge Multi-Week) -->
-            <div class="hidden sm:flex items-center gap-2 pb-2">
-              <span class="text-[11px] text-slate-400 font-medium">Upload Mode:</span>
-              <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-[11px]">
-                <button type="button" id="uploadModeReplaceBtn" onclick="setUploadMode('replace')" class="px-2.5 py-1 rounded-md font-semibold bg-white text-indigo-700 shadow-2xs">
+            <!-- Upload Combination Mode (Replace vs Merge Multi-Week Black Bordered Options) -->
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-900 dark:text-slate-400 font-semibold">Upload Mode:</span>
+              <div class="inline-flex rounded-xl border-2 border-gray-600 dark:border-slate-700 p-1 bg-slate-50 dark:bg-slate-800 text-[11px] gap-1">
+                <button type="button" id="uploadModeReplaceBtn" onclick="setUploadMode('replace')" class="px-3 py-1 rounded-lg font-bold border-2 border-gray-600 bg-white text-[#550000] shadow-2xs transition-all cursor-pointer">
                   Replace Catalog
                 </button>
-                <button type="button" id="uploadModeMergeBtn" onclick="setUploadMode('merge')" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900">
+                <button type="button" id="uploadModeMergeBtn" onclick="setUploadMode('merge')" class="px-3 py-1 rounded-lg font-medium border-2 border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all cursor-pointer">
                   Merge / Accumulate Multi-Week
                 </button>
               </div>
@@ -373,18 +319,18 @@
 
           <!-- Mode 1: Drag and Drop Zone -->
           <div id="ingestUploadArea" class="mt-5 space-y-4">
-            <div id="csvDropZone" class="relative border-2 border-dashed border-slate-300 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/50 hover:bg-slate-50 hover:border-indigo-400 transition-all cursor-pointer">
+            <div id="csvDropZone" class="relative border-2 border-dashed border-slate-400 dark:border-slate-600 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/70 hover:bg-slate-50 hover:border-[#550000] transition-all cursor-pointer shadow-inner">
               <div class="flex flex-col items-center justify-center">
-                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                <div class="w-12 h-12 rounded-xl bg-red-50 text-[#550000] border-2 border-red-200 flex items-center justify-center mb-3">
                   <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
                 </div>
-                <h4 class="text-sm font-bold text-slate-800">Drag &amp; drop your Excel (.xlsx, .xls) or CSV files here</h4>
-                <p class="text-xs text-slate-400 mt-1 max-w-md">
+                <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100">Drag &amp; drop your Excel (.xlsx, .xls) or CSV files here</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md">
                   Select one or <strong>multiple files at once</strong> (e.g. Week 1 + Week 2 + Week 3). Automatic header detection &amp; unit margin calculations.
                 </p>
                 <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
                   <!-- Use <label> as primary trigger — works 100% across all browsers without JS -->
-                  <label for="csvFileInput" class="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer select-none">
+                  <label for="csvFileInput" class="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer select-none">
                     <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
                     Browse Local Files (Multiple Allowed)
                   </label>
@@ -480,13 +426,37 @@
       <section id="viewForecast" data-view-section class="hidden space-y-6">
         
         <!-- Interactive Controls Bar: Horizon Slider & Festival Surge Slider -->
-        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-2xs">
+        <div class="bg-white p-5 rounded-2xl border-2 border-gray-600 shadow-sm space-y-4">
           
+          <!-- Proven Global Retail Forecast Models (Instruction 1) -->
+          <div class="p-3.5 rounded-xl border-2 border-gray-600 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-[#550000] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">AI</div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-900">Enterprise Retail Forecast Engine</span>
+                  <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">Global Standards</span>
+                </div>
+                <span class="text-[11px] text-slate-500" id="currentModelDesc">Auto-selecting optimal model per SKU using Syntetos-Boylan demand pattern classification</span>
+              </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+              <label for="forecastModelSelector" class="text-xs font-bold text-slate-800">Forecast Model:</label>
+              <select id="forecastModelSelector" onchange="setForecastModel(this.value)" class="text-xs font-bold text-slate-900 bg-white border-2 border-gray-600 rounded-lg px-3 py-1.5 cursor-pointer shadow-2xs focus:ring-1 focus:ring-black">
+                <option value="auto">Auto-Best Fit (Syntetos-Boylan Matrix)</option>
+                <option value="holt-winters">Holt-Winters (Double Exponential + 7d Seasonality)</option>
+                <option value="croston-sba">Croston SBA (Intermittent / Lumpy Demand)</option>
+                <option value="adaptive-wma">Adaptive WMA (Recency-Weighted + Weekend Peak)</option>
+              </select>
+            </div>
+          </div>
+
           <!-- Quick Preset Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 mb-4 border-b border-slate-100">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-slate-700">Quick Horizon:</span>
-              <button onclick="setForecastHorizon(7)" id="preset7d" class="px-2.5 py-1 text-xs font-bold rounded-md bg-indigo-600 text-white shadow-2xs transition-all flex items-center gap-1">
+              <button onclick="setForecastHorizon(7)" id="preset7d" class="px-2.5 py-1 text-xs font-bold rounded-md bg-indigo-600 text-white shadow-2xs transition-all flex items-center gap-1 cursor-pointer">
                 <i data-lucide="zap" class="w-3 h-3"></i>
                 7 Days (Weekly Sales)
               </button>
@@ -608,29 +578,29 @@
 
         </div>
 
-        <!-- Filter Buckets & SKU Table -->
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <!-- Filter Buckets & SKU Table (Black Bordered Card & Options) -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-600 dark:border-slate-700 shadow-sm overflow-hidden">
           
-          <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="p-4 sm:p-5 border-b-2 border-gray-600 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h3 class="text-sm font-bold text-slate-900">Product-Level Demand Forecast</h3>
-              <p class="text-xs text-slate-400">Dynamically calculated sales velocities, safety stocks, and reorder points per SKU.</p>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Product-Level Demand Forecast</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Dynamically calculated sales velocities, safety stocks, and reorder points per SKU.</p>
             </div>
 
-            <!-- Bucket Filter Pills -->
+            <!-- Bucket Filter Pills (Black Bordered Options) -->
             <div class="flex flex-wrap items-center gap-2">
-              <button data-bucket-filter="all" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-900 text-white transition-all">All SKUs</button>
-              <button data-bucket-filter="fast-movers" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">⚡ Fast Movers</button>
-              <button data-bucket-filter="steady" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Steady Stock</button>
-              <button data-bucket-filter="dead-stock" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">❄️ Dead Stock</button>
-              <button data-bucket-filter="urgent" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">⚠️ Urgent Reorders</button>
+              <button data-bucket-filter="all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#550000] text-white border-2 border-gray-600 transition-all cursor-pointer shadow-2xs">All SKUs</button>
+              <button data-bucket-filter="fast-movers" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-800 border-2 border-gray-600 dark:border-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs">Fast Movers</button>
+              <button data-bucket-filter="steady" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-800 border-2 border-gray-600 dark:border-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs">Steady Stock</button>
+              <button data-bucket-filter="dead-stock" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-800 border-2 border-gray-600 dark:border-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs">Dead Stock</button>
+              <button data-bucket-filter="urgent" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-800 border-2 border-gray-600 dark:border-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs">Urgent Reorders</button>
             </div>
           </div>
 
-          <div class="px-5 py-3 bg-slate-50/70 border-b border-slate-200/80 flex items-center justify-between">
+          <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b-2 border-gray-600 dark:border-slate-800 flex items-center justify-between">
             <div class="relative w-full max-w-xs">
               <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-              <input id="skuSearchInput" type="text" placeholder="Search SKU, item name or category..." class="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <input id="skuSearchInput" type="text" placeholder="Search SKU, item name or category..." class="w-full bg-white dark:bg-slate-800 border-2 border-gray-600 dark:border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-600">
             </div>
             <span class="text-xs text-slate-400">Auto-calculated using 95% service level safety stocks</span>
           </div>
@@ -713,8 +683,8 @@
           <div>
             <p class="text-xs text-slate-500">Auto-populated purchase drafts grouped by vendor with lead-time awareness.</p>
           </div>
-          <!-- WhatsApp dispatch icon (brown box → replaced with WhatsApp logo) -->
-          <button onclick="document.getElementById('poWhatsAppBtn') && document.getElementById('poWhatsAppBtn').click()" title="Send via WhatsApp" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all self-start sm:self-auto">
+          <!-- WhatsApp dispatch icon -->
+          <button onclick="sendPOViaWhatsApp()" title="Send via WhatsApp" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all self-start sm:self-auto cursor-pointer border border-emerald-600">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/>
@@ -931,7 +901,7 @@
             <i data-lucide="printer" class="w-3.5 h-3.5"></i>
             Print / Save PDF
           </button>
-          <button id="poWhatsAppBtn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">
+          <button id="poWhatsAppBtn" onclick="sendPOViaWhatsApp()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm cursor-pointer transition-all">
             <i data-lucide="send" class="w-3.5 h-3.5"></i>
             Send via WhatsApp
           </button>
