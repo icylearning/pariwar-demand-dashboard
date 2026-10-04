@@ -595,7 +595,9 @@ table {
   border: 1.5px solid var(--box-border) !important;
   border-radius: 0.75rem !important;
 }
-#uploadModeMergeBtn { border-radius: 0.5rem !important; }
+#uploadModeMergeBtn {
+  display: none !important;
+}
 
 /* Drop zone */
 #csvDropZone {
