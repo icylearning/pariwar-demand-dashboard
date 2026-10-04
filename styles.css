@@ -358,6 +358,23 @@ input[type="range"]::-moz-range-track {
     font-size: 15px !important;
   }
 
+  /* Ensure filter pills on mobile have sufficient breathing room so outer active rings never clip up/down */
+  .filter-pill-container {
+    padding: 4px 2px !important;
+    overflow: visible !important;
+  }
+  .filter-pill-container .burgundy-pill {
+    margin: 1px 0 !important;
+  }
+
+  /* Prevent category select from clipping on mobile screen edges */
+  #categoryFilterSelect {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    text-overflow: ellipsis !important;
+  }
+
   /* Compact navigation bar on mobile - 2x2 Grid View where all options are visible at once */
   .options-nav-bar {
     border-radius: 1rem !important;

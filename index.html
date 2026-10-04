@@ -481,23 +481,28 @@
         <div class="bg-white p-5 rounded-2xl border-2 border-gray-300 shadow-sm space-y-4">
           
           <!-- Quick Preset Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-700">Quick Horizon:</span>
-              <button onclick="setForecastHorizon(7)" id="preset7d" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">
-                <i data-lucide="zap" class="w-3 h-3"></i>
-                <span>7 Days (Weekly Sales)</span>
-              </button>
-              <button onclick="setForecastHorizon(14)" id="preset14d" class="burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer">
-                <span>14 Days (Bi-Weekly)</span>
-              </button>
-              <button onclick="setForecastHorizon(30)" id="preset30d" class="burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer">
-                <span>30 Days (Monthly)</span>
-              </button>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 pb-3.5 border-b border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+              <span class="text-xs font-bold text-slate-700 shrink-0">Quick Horizon:</span>
+              <div class="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2 w-full sm:w-auto">
+                <button onclick="setForecastHorizon(7)" id="preset7d" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer flex items-center justify-center text-center px-1.5 py-1.5 sm:px-3 sm:py-1">
+                  <i data-lucide="zap" class="w-3 h-3 shrink-0"></i>
+                  <span class="hidden sm:inline">7 Days (Weekly Sales)</span>
+                  <span class="sm:hidden">7 Days</span>
+                </button>
+                <button onclick="setForecastHorizon(14)" id="preset14d" class="burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer flex items-center justify-center text-center px-1.5 py-1.5 sm:px-3 sm:py-1">
+                  <span class="hidden sm:inline">14 Days (Bi-Weekly)</span>
+                  <span class="sm:hidden">14 Days</span>
+                </button>
+                <button onclick="setForecastHorizon(30)" id="preset30d" class="burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer flex items-center justify-center text-center px-1.5 py-1.5 sm:px-3 sm:py-1">
+                  <span class="hidden sm:inline">30 Days (Monthly)</span>
+                  <span class="sm:hidden">30 Days</span>
+                </button>
+              </div>
             </div>
 
             <!-- Weekend Spike Toggle -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-between sm:justify-start gap-2 pt-1 sm:pt-0 border-t border-slate-100 sm:border-0">
               <span class="text-[11px] text-slate-400 font-medium">Weekend Surge:</span>
               <button id="weekendSurgeToggleBtn" onclick="toggleWeekendSurge()" class="px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200 transition-all">
                 Active (+25% Sat/Sun)
@@ -602,35 +607,37 @@
             </div>
 
             <!-- Bucket Filter Pills (Burgundy Pill Options) -->
-            <div class="flex flex-wrap items-center gap-2 mobile-pill-scroll">
-              <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">All SKUs</button>
-              <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Fast Movers</button>
-              <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Steady Stock</button>
-              <button data-bucket-filter="dead-stock" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Dead Stock</button>
-              <button data-bucket-filter="urgent" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Urgent Reorders</button>
+            <div class="filter-pill-container grid grid-cols-6 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
+              <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer col-span-2 sm:col-auto flex items-center justify-center text-center py-1.5 px-2 sm:px-3.5">All SKUs</button>
+              <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer col-span-2 sm:col-auto flex items-center justify-center text-center py-1.5 px-2 sm:px-3.5">Fast Movers</button>
+              <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer col-span-2 sm:col-auto flex items-center justify-center text-center py-1.5 px-2 sm:px-3.5">Steady Stock</button>
+              <button data-bucket-filter="dead-stock" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer col-span-3 sm:col-auto flex items-center justify-center text-center py-1.5 px-2 sm:px-3.5">Dead Stock</button>
+              <button data-bucket-filter="urgent" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer col-span-3 sm:col-auto flex items-center justify-center text-center py-1.5 px-2 sm:px-3.5">Urgent Reorders</button>
             </div>
           </div>
 
           <!-- Category / Item Type Filter Option Bar -->
-          <div class="px-4 sm:px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="px-4 sm:px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0 text-xs">
                 <i data-lucide="layers" class="w-4 h-4 text-[#851218]"></i>
                 <span>Categorize by Type:</span>
               </span>
-              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold text-xs flex-1 sm:flex-initial">
-                <option value="all" class="bg-white text-slate-900">All Product Types (Show All)</option>
-                <option value="Beverages" class="bg-white text-slate-900">Beverages (Tea, Coffee, Juices)</option>
-                <option value="Dairy" class="bg-white text-slate-900">Dairy (Milk, Butter, Paneer, Ghee)</option>
-                <option value="Soft Drinks" class="bg-white text-slate-900">Soft Drinks (Coke, Pepsi, Sprite)</option>
-                <option value="Spices" class="bg-white text-slate-900">Spices (Masalas, Haldi, Mirchi, Jeera)</option>
-                <option value="Pulses" class="bg-white text-slate-900">Pulses (Dals, Moong, Chana, Grains)</option>
-                <option value="Oils" class="bg-white text-slate-900">Oils (Cooking &amp; Mustard Oils)</option>
-                <option value="Biscuits & Snacks" class="bg-white text-slate-900">Biscuits &amp; Snacks</option>
-                <option value="Chocolates" class="bg-white text-slate-900">Chocolates &amp; Confectionery</option>
-                <option value="Personal Care" class="bg-white text-slate-900">Personal Care &amp; Hygiene</option>
-                <option value="Ice Creams" class="bg-white text-slate-900">Ice Creams &amp; Frozen</option>
-              </select>
+              <div class="w-full sm:w-auto min-w-0 pr-1 sm:pr-0">
+                <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-2 px-3 cursor-pointer outline-none font-semibold text-xs w-full sm:w-auto max-w-full">
+                  <option value="all" class="bg-white text-slate-900">All Product Types (Show All)</option>
+                  <option value="Beverages" class="bg-white text-slate-900">Beverages (Tea, Coffee, Juices)</option>
+                  <option value="Dairy" class="bg-white text-slate-900">Dairy (Milk, Butter, Paneer, Ghee)</option>
+                  <option value="Soft Drinks" class="bg-white text-slate-900">Soft Drinks (Coke, Pepsi, Sprite)</option>
+                  <option value="Spices" class="bg-white text-slate-900">Spices (Masalas, Haldi, Mirchi, Jeera)</option>
+                  <option value="Pulses" class="bg-white text-slate-900">Pulses (Dals, Moong, Chana, Grains)</option>
+                  <option value="Oils" class="bg-white text-slate-900">Oils (Cooking &amp; Mustard Oils)</option>
+                  <option value="Biscuits & Snacks" class="bg-white text-slate-900">Biscuits &amp; Snacks</option>
+                  <option value="Chocolates" class="bg-white text-slate-900">Chocolates &amp; Confectionery</option>
+                  <option value="Personal Care" class="bg-white text-slate-900">Personal Care &amp; Hygiene</option>
+                  <option value="Ice Creams" class="bg-white text-slate-900">Ice Creams &amp; Frozen</option>
+                </select>
+              </div>
             </div>
           </div>
 
