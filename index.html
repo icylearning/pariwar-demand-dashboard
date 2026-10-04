@@ -477,30 +477,6 @@
         <!-- Interactive Controls Bar: Horizon Slider & Festival Surge Slider -->
         <div class="bg-white p-5 rounded-2xl border-2 border-gray-300 shadow-sm space-y-4">
           
-          <!-- Proven Global Retail Forecast Models (Instruction 1) -->
-          <div class="p-3.5 rounded-xl border-2 border-gray-300 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-[#550000] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">AI</div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-slate-900">Enterprise Retail Forecast Engine</span>
-                  <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">Global Standards</span>
-                </div>
-                <span class="text-[11px] text-slate-500" id="currentModelDesc">Auto-selecting optimal model per SKU using Syntetos-Boylan demand pattern classification</span>
-              </div>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-2">
-              <label for="forecastModelSelector" class="text-xs font-bold text-slate-800">Forecast Model:</label>
-              <select id="forecastModelSelector" onchange="setForecastModel(this.value)" class="text-xs font-bold text-slate-900 bg-white border-2 border-gray-300 rounded-lg px-3 py-1.5 cursor-pointer shadow-2xs focus:ring-1 focus:ring-black">
-                <option value="auto">Auto-Best Fit (Syntetos-Boylan Matrix)</option>
-                <option value="holt-winters">Holt-Winters (Double Exponential + 7d Seasonality)</option>
-                <option value="croston-sba">Croston SBA (Intermittent / Lumpy Demand)</option>
-                <option value="adaptive-wma">Adaptive WMA (Recency-Weighted + Weekend Peak)</option>
-              </select>
-            </div>
-          </div>
-
           <!-- Quick Preset Buttons -->
           <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200">
             <div class="flex items-center gap-2">
@@ -552,9 +528,9 @@
                   <i data-lucide="sparkles" class="w-4 h-4 text-[#851218]"></i>
                   <span>Festival / Seasonal Demand Multiplier</span>
                 </label>
-                <span id="surgeSliderVal" class="text-xs font-mono font-bold text-[#851218] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-full">+15%</span>
+                <span id="surgeSliderVal" class="text-xs font-mono font-bold text-[#851218] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-full">+0%</span>
               </div>
-              <input type="range" id="surgeSlider" min="0" max="50" step="5" value="15">
+              <input type="range" id="surgeSlider" min="0" max="50" step="5" value="0">
               <div class="flex justify-between text-[10px] text-slate-400 mt-1">
                 <span>0% (Baseline pace)</span>
                 <span>+25% (Diwali / Holiday spike)</span>
@@ -600,28 +576,14 @@
             </div>
           </div>
 
-          <!-- Day-by-Day Chart & Top 5 Weekly Items -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-            <!-- Day-by-Day Breakdown Chart (Span 2) -->
-            <div class="lg:col-span-2">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-800">Day-by-Day Sales Trajectory (Mon &ndash; Sun)</span>
-                <span class="text-[10px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded">Sat & Sun: Peak Days</span>
-              </div>
-              <div class="relative h-48 w-full">
-                <canvas id="weeklyBreakdownChart"></canvas>
-              </div>
+          <!-- Day-by-Day Sales Trajectory Chart (Full Width) -->
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-800">Day-by-Day Sales Trajectory (Mon &ndash; Sun)</span>
+              <span class="text-[10px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded">Sat & Sun: Peak Days</span>
             </div>
-
-            <!-- Top 5 Movers This Week (Span 1) -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-800">Top Weekly Movers</span>
-                <span class="text-[10px] text-slate-400">7-Day Volume</span>
-              </div>
-              <div id="topWeekItemsList" class="space-y-1">
-                <!-- Dynamically populated -->
-              </div>
+            <div class="relative h-48 w-full">
+              <canvas id="weeklyBreakdownChart"></canvas>
             </div>
           </div>
 
@@ -636,24 +598,13 @@
               <p class="text-xs text-slate-500 dark:text-slate-400">Dynamically calculated sales velocities, safety stocks, and reorder points per SKU.</p>
             </div>
 
-            <!-- Bucket Filter Pills (Burgundy Pill Options) -->
-            <div class="flex flex-wrap items-center gap-2">
-              <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">All SKUs</button>
-              <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Fast Movers</button>
-              <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Steady Stock</button>
-              <button data-bucket-filter="dead-stock" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Dead Stock</button>
-              <button data-bucket-filter="urgent" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Urgent Reorders</button>
-            </div>
-          </div>
-
-          <!-- Category / Item Type Filter Option Bar (Requirement 3) -->
-          <div class="px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <!-- Categorize by Type Option (Only filter kept as requested) -->
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-800 flex items-center gap-1.5 shrink-0">
+              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0 text-xs">
                 <i data-lucide="layers" class="w-4 h-4 text-[#851218]"></i>
                 <span>Categorize by Type:</span>
               </span>
-              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold">
+              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold text-xs">
                 <option value="all" class="bg-white text-slate-900">All Product Types (Show All)</option>
                 <option value="Beverages" class="bg-white text-slate-900">Beverages (Tea, Coffee, Juices)</option>
                 <option value="Dairy" class="bg-white text-slate-900">Dairy (Milk, Butter, Paneer, Ghee)</option>
@@ -666,17 +617,6 @@
                 <option value="Personal Care" class="bg-white text-slate-900">Personal Care &amp; Hygiene</option>
                 <option value="Ice Creams" class="bg-white text-slate-900">Ice Creams &amp; Frozen</option>
               </select>
-            </div>
-
-            <!-- Quick Category Shortcut Pills (Clean wrapper, no scrollbars) -->
-            <div class="flex flex-wrap items-center gap-2 py-1" id="quickCategoryPillContainer">
-              <button type="button" onclick="setCategoryFilter('all')" data-cat-pill="all" class="cat-pill active">All</button>
-              <button type="button" onclick="setCategoryFilter('Beverages')" data-cat-pill="Beverages" class="cat-pill">Beverages</button>
-              <button type="button" onclick="setCategoryFilter('Dairy')" data-cat-pill="Dairy" class="cat-pill">Dairy</button>
-              <button type="button" onclick="setCategoryFilter('Soft Drinks')" data-cat-pill="Soft Drinks" class="cat-pill">Soft Drinks</button>
-              <button type="button" onclick="setCategoryFilter('Spices')" data-cat-pill="Spices" class="cat-pill">Spices</button>
-              <button type="button" onclick="setCategoryFilter('Pulses')" data-cat-pill="Pulses" class="cat-pill">Pulses</button>
-              <button type="button" onclick="setCategoryFilter('Oils')" data-cat-pill="Oils" class="cat-pill">Oils</button>
             </div>
           </div>
 
@@ -769,7 +709,6 @@
               <span class="w-2.5 h-2.5 rounded-full bg-[#851218]"></span>
               <h2 class="text-base font-bold text-slate-900">Unified Purchase Order &amp; Restock Execution</h2>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Consolidated store purchase order for Pariwar Supermarket &bull; All replenishment items unified in one order without categorization.</p>
           </div>
           
           <div class="flex flex-wrap items-center gap-2.5">
@@ -925,7 +864,7 @@
       <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-4 animate-bounce">
         <i data-lucide="cpu" class="w-6 h-6"></i>
       </div>
-      <h3 class="text-sm font-bold text-slate-900 mb-1">Step 3: Historical Cleaning & Engine Processing</h3>
+      <h3 class="text-sm font-bold text-slate-900 mb-1">Historical Cleaning & Engine Processing</h3>
       <p class="text-xs text-slate-400 mb-6">Analyzing historical sales anomalies, seasonality, and calculating optimal safety stock.</p>
 
       <div class="space-y-3 text-left text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">

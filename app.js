@@ -16,9 +16,9 @@ const StockPulse = {
 
   // Interactive Forecasting Parameters
   forecastHorizonDays: 7, // Default to 7 days for weekly sales prediction
-  festivalSurgePercent: 15,
+  festivalSurgePercent: 0,
   weeklyWeekendSurge: true, // +25% spike on Saturday and Sunday
-  forecastModel: 'auto', // 'auto', 'holt-winters', 'croston-sba', 'adaptive-wma'
+  forecastModel: 'auto', // Best model: Auto-Best Fit Syntetos-Boylan Matrix
   activeFilterBucket: 'all', // 'all', 'fast-movers', 'steady', 'dead-stock', 'urgent'
   activeCategoryFilter: 'all', // 'all', 'Beverages', 'Dairy', 'Soft Drinks', 'Spices', 'Pulses', 'Oils', etc.
   selectedSkusForPO: new Set(),
@@ -1071,6 +1071,34 @@ window.setForecastModel = function(modelKey) {
   showToast(`Forecast model active: ${modelNames[modelKey] || modelKey}`, 'success');
 };
 
+// Helper to provide smooth gradient tracking and micro-bounce animation for sliders
+function updateSliderVisuals(slider, valElem, text) {
+  if (!slider) return;
+  const min = parseFloat(slider.min) || 0;
+  const max = parseFloat(slider.max) || 100;
+  const val = parseFloat(slider.value) || 0;
+  const percent = Math.min(100, Math.max(0, ((val - min) / (max - min)) * 100));
+  slider.style.background = `linear-gradient(to right, #851218 0%, #851218 ${percent}%, #fecdd3 ${percent}%, #fecdd3 100%)`;
+  if (valElem && text !== undefined) {
+    valElem.textContent = text;
+    valElem.style.transform = 'scale(1.15)';
+    clearTimeout(valElem._pulseTimer);
+    valElem._pulseTimer = setTimeout(() => {
+      valElem.style.transform = 'scale(1)';
+    }, 140);
+  }
+}
+
+window.resetFestivalSurgeSlider = function() {
+  StockPulse.festivalSurgePercent = 0;
+  const surgeSlider = document.getElementById('surgeSlider');
+  const surgeVal = document.getElementById('surgeSliderVal');
+  if (surgeSlider) {
+    surgeSlider.value = 0;
+    updateSliderVisuals(surgeSlider, surgeVal, '+0%');
+  }
+};
+
 // ============================================================================
 // Event Listeners & Interaction Handlers
 // ============================================================================
@@ -1080,9 +1108,10 @@ function setupEventListeners() {
   const horizonSlider = document.getElementById('horizonSlider');
   const horizonVal = document.getElementById('horizonSliderVal');
   if (horizonSlider) {
+    updateSliderVisuals(horizonSlider, horizonVal, `${StockPulse.forecastHorizonDays} Days`);
     horizonSlider.addEventListener('input', (e) => {
       StockPulse.forecastHorizonDays = parseInt(e.target.value, 10);
-      if (horizonVal) horizonVal.textContent = `${StockPulse.forecastHorizonDays} Days`;
+      updateSliderVisuals(horizonSlider, horizonVal, `${StockPulse.forecastHorizonDays} Days`);
       renderAllViews();
     });
   }
@@ -1091,9 +1120,10 @@ function setupEventListeners() {
   const surgeSlider = document.getElementById('surgeSlider');
   const surgeVal = document.getElementById('surgeSliderVal');
   if (surgeSlider) {
+    updateSliderVisuals(surgeSlider, surgeVal, `+${StockPulse.festivalSurgePercent}%`);
     surgeSlider.addEventListener('input', (e) => {
       StockPulse.festivalSurgePercent = parseInt(e.target.value, 10);
-      if (surgeVal) surgeVal.textContent = `+${StockPulse.festivalSurgePercent}%`;
+      updateSliderVisuals(surgeSlider, surgeVal, `+${StockPulse.festivalSurgePercent}%`);
       renderAllViews();
     });
   }
@@ -1988,6 +2018,11 @@ function processRetailSalesData(rawContent, sourceName = 'Uploaded Data', option
     }
   });
 
+  // Keep festival/seasonal demand multiplier slider on zero whenever data is uploaded (Instruction 2)
+  if (typeof window.resetFestivalSurgeSlider === 'function') {
+    window.resetFestivalSurgeSlider();
+  }
+
   if (!skipUi) {
     runSimulatedDataCleaning(`Successfully ingested ${parsedItems.length} products from ${sourceName}`);
   }
@@ -2096,6 +2131,10 @@ window.clearAllIngestedData = function() {
   StockPulse.customPOQty = {};
   StockPulse.selectedSkusForPO.clear();
 
+  if (typeof window.resetFestivalSurgeSlider === 'function') {
+    window.resetFestivalSurgeSlider();
+  }
+
   const batchCard = document.getElementById('batchUploadQueueCard');
   if (batchCard) batchCard.classList.add('hidden');
   updateSalesPeriodUI(null);
@@ -2110,6 +2149,11 @@ window.runSimulatedDataCleaning = function runSimulatedDataCleaning(successMessa
     showToast('Upload a sales Excel/CSV file first.', 'error');
     switchMainView('viewIngestion');
     return;
+  }
+
+  // Ensure festival multiplier starts at 0% when new data is cleaned & loaded
+  if (typeof window.resetFestivalSurgeSlider === 'function') {
+    window.resetFestivalSurgeSlider();
   }
 
   const procModal = document.getElementById('engineProcessingModal');
