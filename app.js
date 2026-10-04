@@ -340,22 +340,49 @@ function renderAllViews() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+// Helper to trigger micro-bounce animation on metric elements
+function triggerMetricPop(elem) {
+  if (!elem) return;
+  elem.classList.remove('num-pop');
+  void elem.offsetWidth; // trigger reflow
+  elem.classList.add('num-pop');
+}
+
 function updateHealthCards(health) {
   const sym = StockPulse.profile.currency;
   const expRev = document.getElementById('kpiExpectedRev');
-  if (expRev) expRev.textContent = `${sym}${health.expectedRevenue.toLocaleString('en-IN')}`;
+  if (expRev) {
+    expRev.textContent = `${sym}${health.expectedRevenue.toLocaleString('en-IN')}`;
+    triggerMetricPop(expRev);
+  }
 
   const stockoutRisk = document.getElementById('kpiStockoutRisk');
-  if (stockoutRisk) stockoutRisk.textContent = `${sym}${health.stockoutRiskCost.toLocaleString('en-IN')}`;
+  if (stockoutRisk) {
+    stockoutRisk.textContent = `${sym}${health.stockoutRiskCost.toLocaleString('en-IN')}`;
+    triggerMetricPop(stockoutRisk);
+  }
 
   const deadCap = document.getElementById('kpiDeadCapital');
-  if (deadCap) deadCap.textContent = `${sym}${health.deadCapital.toLocaleString('en-IN')}`;
+  if (deadCap) {
+    deadCap.textContent = `${sym}${health.deadCapital.toLocaleString('en-IN')}`;
+    triggerMetricPop(deadCap);
+  }
 
   const reorderCost = document.getElementById('kpiReorderNeeded');
-  if (reorderCost) reorderCost.textContent = `${sym}${health.totalReorderNeededCost.toLocaleString('en-IN')}`;
+  if (reorderCost) {
+    reorderCost.textContent = `${sym}${health.totalReorderNeededCost.toLocaleString('en-IN')}`;
+    triggerMetricPop(reorderCost);
+  }
 
   const urgentBadge = document.getElementById('urgentCountBadge');
-  if (urgentBadge) urgentBadge.textContent = StockPulse.inventory.length === 0 ? 'Awaiting data' : `${health.urgentStockoutCount} critical`;
+  if (urgentBadge) {
+    urgentBadge.textContent = StockPulse.inventory.length === 0 ? 'Awaiting data' : `${health.urgentStockoutCount} critical`;
+    if (health.urgentStockoutCount > 0) {
+      urgentBadge.classList.add('badge-urgent-pulse');
+    } else {
+      urgentBadge.classList.remove('badge-urgent-pulse');
+    }
+  }
 }
 
 function renderStoreHighlights(enrichedItems) {
@@ -777,9 +804,18 @@ function renderVendorPOGroups(enrichedItems) {
     }).join('');
   }
 
-  if (countEl) countEl.textContent = `${orderList.length} SKUs`;
-  if (unitsEl) unitsEl.textContent = `${totalUnits.toLocaleString('en-IN')} units`;
-  if (costEl) costEl.textContent = `${StockPulse.profile.currency}${totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (countEl) {
+    countEl.textContent = `${orderList.length} SKUs`;
+    triggerMetricPop(countEl);
+  }
+  if (unitsEl) {
+    unitsEl.textContent = `${totalUnits.toLocaleString('en-IN')} units`;
+    triggerMetricPop(unitsEl);
+  }
+  if (costEl) {
+    costEl.textContent = `${StockPulse.profile.currency}${totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    triggerMetricPop(costEl);
+  }
   if (leadEl) leadEl.textContent = `3 - 4 Days`;
   if (legacyContainer) legacyContainer.innerHTML = '';
   if (window.lucide) window.lucide.createIcons();
@@ -921,16 +957,28 @@ function renderWeeklySalesIntelligence(enrichedItems) {
   });
 
   const revElem = document.getElementById('weekProjectedRev');
-  if (revElem) revElem.textContent = `${StockPulse.profile.currency}${Math.round(weekRevenue).toLocaleString('en-IN')}`;
+  if (revElem) {
+    revElem.textContent = `${StockPulse.profile.currency}${Math.round(weekRevenue).toLocaleString('en-IN')}`;
+    triggerMetricPop(revElem);
+  }
 
   const unitsElem = document.getElementById('weekProjectedUnits');
-  if (unitsElem) unitsElem.textContent = `${weekUnits.toLocaleString('en-IN')}`;
+  if (unitsElem) {
+    unitsElem.textContent = `${weekUnits.toLocaleString('en-IN')}`;
+    triggerMetricPop(unitsElem);
+  }
 
   const stockoutElem = document.getElementById('weekStockoutCount');
-  if (stockoutElem) stockoutElem.textContent = `${weekStockouts} SKUs`;
+  if (stockoutElem) {
+    stockoutElem.textContent = `${weekStockouts} SKUs`;
+    triggerMetricPop(stockoutElem);
+  }
 
   const poElem = document.getElementById('weekPOEstimate');
-  if (poElem) poElem.textContent = `${StockPulse.profile.currency}${Math.round(weekPOCost).toLocaleString('en-IN')}`;
+  if (poElem) {
+    poElem.textContent = `${StockPulse.profile.currency}${Math.round(weekPOCost).toLocaleString('en-IN')}`;
+    triggerMetricPop(poElem);
+  }
 
   // Render Day-by-Day 7-Day Chart
   const ctx = document.getElementById('weeklyBreakdownChart')?.getContext('2d');

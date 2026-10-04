@@ -369,9 +369,9 @@
 
           <!-- Mode 1: Drag and Drop Zone -->
           <div id="ingestUploadArea" class="mt-5 space-y-4">
-            <div id="csvDropZone" class="relative border-2 border-dashed border-gray-300 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/70 hover:bg-slate-50 hover:border-[#851218] transition-all cursor-pointer shadow-inner">
+            <div id="csvDropZone" class="relative border-2 border-dashed border-gray-300 rounded-2xl p-8 sm:p-10 text-center bg-slate-50/70 hover:bg-slate-50 hover:border-[#851218] transition-all cursor-pointer shadow-inner hover-elevate">
               <div class="flex flex-col items-center justify-center">
-                <div class="w-12 h-12 rounded-xl bg-red-50 text-[#851218] border-2 border-red-200 flex items-center justify-center mb-3">
+                <div class="w-12 h-12 rounded-xl bg-red-50 text-[#851218] border-2 border-red-200 flex items-center justify-center mb-3 animate-float shadow-xs">
                   <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
                 </div>
                 <h4 class="text-sm font-bold text-slate-800">Drag &amp; drop your Excel (.xlsx, .xls) or CSV files here</h4>
@@ -598,9 +598,20 @@
               <p class="text-xs text-slate-500 dark:text-slate-400">Dynamically calculated sales velocities, safety stocks, and reorder points per SKU.</p>
             </div>
 
-            <!-- Categorize by Type Option (Only filter kept as requested) -->
+            <!-- Bucket Filter Pills (Burgundy Pill Options) -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">All SKUs</button>
+              <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Fast Movers</button>
+              <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Steady Stock</button>
+              <button data-bucket-filter="dead-stock" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Dead Stock</button>
+              <button data-bucket-filter="urgent" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Urgent Reorders</button>
+            </div>
+          </div>
+
+          <!-- Category / Item Type Filter Option Bar -->
+          <div class="px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0 text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0">
                 <i data-lucide="layers" class="w-4 h-4 text-[#851218]"></i>
                 <span>Categorize by Type:</span>
               </span>
