@@ -660,9 +660,9 @@ function renderForecastTable(enrichedItems) {
           <!-- Editable Order Quantity Control (Instruction 1) -->
           <div class="flex items-center gap-1.5">
             <div class="inline-flex items-center border border-slate-200 rounded-lg bg-white shadow-2xs overflow-hidden">
-              <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
-              <input type="number" id="poQtyInput_${item.sku}" min="0" step="1" value="${item.recommendedPOQty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
-              <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
+              <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
+              <input type="number" id="poQtyInput_${item.sku}" min="0" step="1" value="${item.recommendedPOQty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="qty-stepper-input w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
+              <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
             </div>
             <span class="text-[11px] text-slate-400 font-mono">units</span>
           </div>
@@ -817,9 +817,9 @@ function renderVendorPOGroups(enrichedItems) {
           <td class="px-4 py-3 text-right font-mono text-slate-700">${StockPulse.profile.currency}${item.costPrice.toFixed(2)}</td>
           <td class="px-4 py-3 text-center">
             <div class="inline-flex items-center border border-slate-200 rounded-lg bg-white shadow-2xs overflow-hidden">
-              <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
-              <input type="number" id="poQtyInput_po_${item.sku}" min="0" step="1" value="${qty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
-              <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
+              <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
+              <input type="number" id="poQtyInput_po_${item.sku}" min="0" step="1" value="${qty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="qty-stepper-input w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
+              <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
             </div>
           </td>
           <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 pr-6">

@@ -249,22 +249,75 @@ input[type="range"]::-moz-range-track {
   }
 }
 
-/* Touch scroll optimizations for mobile devices (Instruction 7) */
+/* ==========================================================================
+   Mobile Optimization Suite (Strictly Scoped - Zero Impact on PC Layout)
+   ========================================================================== */
+
+/* Universal touch scroll with momentum */
 .scroll-touch {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
 
+/* Tablet & Mobile Screens (<= 768px) */
+@media (max-width: 768px) {
+  /* Prevent iOS Safari from auto-zooming on focus */
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Range sliders touch target enlargement */
+  input[type="range"] {
+    height: 10px;
+    margin: 12px 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0 0 3px #851218, 0 3px 10px rgba(133, 18, 24, 0.45);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0 0 3px #851218, 0 3px 10px rgba(133, 18, 24, 0.45);
+  }
+
+  /* Toast notification banner layout on mobile */
+  #toastContainer {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 16px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+  #toastContainer > div {
+    width: 100% !important;
+    font-size: 13px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* Smartphone Screens (<= 640px) */
 @media (max-width: 640px) {
   body {
     font-size: 13px;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  /* Clean visible micro-scrollbar for tables on mobile */
   .scroll-touch::-webkit-scrollbar {
-    display: none;
+    height: 4px;
+    display: block;
   }
-  .scroll-touch {
-    scrollbar-width: none;
+  .scroll-touch::-webkit-scrollbar-thumb {
+    background: rgba(133, 18, 24, 0.25);
+    border-radius: 9999px;
   }
+
+  /* Hide spinners on number inputs */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -272,6 +325,68 @@ input[type="range"]::-moz-range-track {
   }
   input[type="number"] {
     -moz-appearance: textfield;
+  }
+
+  /* Mobile horizontal swipe for filter buttons and tabs */
+  .mobile-pill-scroll {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px !important;
+    margin-bottom: -4px;
+    scrollbar-width: none;
+    max-width: 100%;
+  }
+  .mobile-pill-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-pill-scroll > * {
+    flex-shrink: 0;
+  }
+
+  /* Easy-tap quantity steppers in table rows */
+  .qty-stepper-btn {
+    width: 32px !important;
+    height: 34px !important;
+    font-size: 15px !important;
+    touch-action: manipulation;
+  }
+  .qty-stepper-input {
+    width: 48px !important;
+    height: 34px !important;
+    font-size: 15px !important;
+  }
+
+  /* Compact navigation bar on mobile */
+  .options-nav-bar {
+    border-radius: 1rem !important;
+    padding: 6px 8px !important;
+  }
+  .nav-option-btn {
+    padding: 7px 13px !important;
+    font-size: 12px !important;
+  }
+
+  /* Modals slide up gracefully as bottom sheets on mobile devices */
+  .modal-backdrop {
+    padding: 8px !important;
+    align-items: flex-end !important;
+  }
+  .modal-backdrop > div {
+    max-height: 94vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    width: 100% !important;
+  }
+  #poPrintArea {
+    padding: 12px !important;
+  }
+
+  /* Larger hit area for checkboxes on mobile touchscreens */
+  input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 

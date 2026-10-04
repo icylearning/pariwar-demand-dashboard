@@ -98,7 +98,7 @@
         <!-- Brand & Store Profiling Info -->
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Pariwar - Everything Under One Roof" class="h-10 object-contain">
+            <img src="logo.png" alt="Pariwar - Everything Under One Roof" class="h-8 sm:h-10 object-contain">
             <div>
               <div class="flex items-center gap-1.5">
                 <span class="font-extrabold text-slate-900 tracking-tight text-base">Pariwar</span>
@@ -599,7 +599,7 @@
             </div>
 
             <!-- Bucket Filter Pills (Burgundy Pill Options) -->
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 mobile-pill-scroll">
               <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">All SKUs</button>
               <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Fast Movers</button>
               <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Steady Stock</button>
@@ -609,13 +609,13 @@
           </div>
 
           <!-- Category / Item Type Filter Option Bar -->
-          <div class="px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0">
+          <div class="px-4 sm:px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shrink-0 text-xs">
                 <i data-lucide="layers" class="w-4 h-4 text-[#851218]"></i>
                 <span>Categorize by Type:</span>
               </span>
-              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold text-xs">
+              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold text-xs flex-1 sm:flex-initial">
                 <option value="all" class="bg-white text-slate-900">All Product Types (Show All)</option>
                 <option value="Beverages" class="bg-white text-slate-900">Beverages (Tea, Coffee, Juices)</option>
                 <option value="Dairy" class="bg-white text-slate-900">Dairy (Milk, Butter, Paneer, Ghee)</option>
@@ -631,12 +631,12 @@
             </div>
           </div>
 
-          <div class="px-5 py-3 bg-white border-b-2 border-gray-300 flex items-center justify-between">
-            <div class="relative w-full max-w-xs">
+          <div class="px-4 sm:px-5 py-3 bg-white border-b-2 border-gray-300 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+            <div class="relative w-full sm:max-w-xs">
               <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
               <input id="skuSearchInput" type="text" placeholder="Search SKU, item name or category..." class="w-full bg-white border-2 border-gray-300 rounded-xl pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-600">
             </div>
-            <span class="text-xs text-slate-400">Auto-calculated using 95% service level safety stocks</span>
+            <span class="text-xs text-slate-400 hidden sm:inline">Auto-calculated using 95% service level safety stocks</span>
           </div>
 
           <!-- Mobile Scroll Tip -->
@@ -714,7 +714,7 @@
       <section id="viewPurchaseOrders" data-view-section class="hidden space-y-6">
         
         <!-- Header & Action Bar -->
-        <div class="p-5 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="p-4 sm:p-5 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-[#851218]"></span>
@@ -722,16 +722,16 @@
             </div>
           </div>
           
-          <div class="flex flex-wrap items-center gap-2.5">
-            <button onclick="openPOModal()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center gap-1.5">
+          <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <button onclick="openPOModal()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <i data-lucide="eye" class="w-4 h-4"></i>
               <span>View Full PO Draft</span>
             </button>
-            <button onclick="downloadPOExcel()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center gap-1.5">
+            <button onclick="downloadPOExcel()" class="burgundy-pill text-xs py-2 px-4 cursor-pointer flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
               <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
               <span>Export Excel (.xlsx)</span>
             </button>
-            <button onclick="sendPOViaWhatsApp()" title="Send via WhatsApp" class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+            <button onclick="sendPOViaWhatsApp()" title="Send via WhatsApp" class="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white text-xs font-semibold shadow-sm transition-all cursor-pointer w-full sm:w-auto">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.855L0 24l6.335-1.607A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.804a9.778 9.778 0 0 1-4.988-1.366l-.357-.213-3.76.954.989-3.645-.233-.374A9.764 9.764 0 0 1 2.196 12C2.196 6.578 6.578 2.196 12 2.196c5.421 0 9.804 4.383 9.804 9.804 0 5.422-4.383 9.804-9.804 9.804z"/></svg>
               <span>Dispatch via WhatsApp</span>
             </button>
