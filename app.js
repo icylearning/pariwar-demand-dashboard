@@ -2520,8 +2520,8 @@ window.setCategoryFilter = function(category) {
   pills.forEach(pill => {
     const pillCat = pill.getAttribute('data-cat-pill');
     const isMatch = pillCat.toLowerCase() === StockPulse.activeCategoryFilter.toLowerCase();
+    pill.classList.toggle('active', isMatch);
     pill.classList.toggle('active-tab', isMatch);
-    pill.classList.toggle('opacity-80', !isMatch);
   });
 
   const health = computeAggregateHealth();

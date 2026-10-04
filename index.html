@@ -772,15 +772,15 @@
               </select>
             </div>
 
-            <!-- Quick Category Shortcut Pills -->
-            <div class="flex flex-wrap items-center gap-1.5 overflow-x-auto scroll-touch" id="quickCategoryPillContainer">
-              <button type="button" onclick="setCategoryFilter('all')" data-cat-pill="all" class="burgundy-pill burgundy-pill-sm active-tab py-1 px-2.5 text-[11px] cursor-pointer">All</button>
-              <button type="button" onclick="setCategoryFilter('Beverages')" data-cat-pill="Beverages" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Beverages</button>
-              <button type="button" onclick="setCategoryFilter('Dairy')" data-cat-pill="Dairy" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Dairy</button>
-              <button type="button" onclick="setCategoryFilter('Soft Drinks')" data-cat-pill="Soft Drinks" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Soft Drinks</button>
-              <button type="button" onclick="setCategoryFilter('Spices')" data-cat-pill="Spices" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Spices</button>
-              <button type="button" onclick="setCategoryFilter('Pulses')" data-cat-pill="Pulses" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Pulses</button>
-              <button type="button" onclick="setCategoryFilter('Oils')" data-cat-pill="Oils" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Oils</button>
+            <!-- Quick Category Shortcut Pills (Clean wrapper, no scrollbars) -->
+            <div class="flex flex-wrap items-center gap-2 py-1" id="quickCategoryPillContainer">
+              <button type="button" onclick="setCategoryFilter('all')" data-cat-pill="all" class="cat-pill active">All</button>
+              <button type="button" onclick="setCategoryFilter('Beverages')" data-cat-pill="Beverages" class="cat-pill">Beverages</button>
+              <button type="button" onclick="setCategoryFilter('Dairy')" data-cat-pill="Dairy" class="cat-pill">Dairy</button>
+              <button type="button" onclick="setCategoryFilter('Soft Drinks')" data-cat-pill="Soft Drinks" class="cat-pill">Soft Drinks</button>
+              <button type="button" onclick="setCategoryFilter('Spices')" data-cat-pill="Spices" class="cat-pill">Spices</button>
+              <button type="button" onclick="setCategoryFilter('Pulses')" data-cat-pill="Pulses" class="cat-pill">Pulses</button>
+              <button type="button" onclick="setCategoryFilter('Oils')" data-cat-pill="Oils" class="cat-pill">Oils</button>
             </div>
           </div>
 

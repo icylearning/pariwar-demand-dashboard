@@ -276,7 +276,7 @@ input[type="range"]::-moz-range-track {
 }
 
 /* ==========================================================================
-   Universal Burgundy Pill Button System (with Concentric Outer Ring)
+   Universal Burgundy Pill Button System (Self-Contained Concentric Ring via Shadow)
    ========================================================================== */
 .burgundy-pill,
 .nav-option-btn {
@@ -302,29 +302,11 @@ input[type="range"]::-moz-range-track {
   text-decoration: none;
 }
 
-/* Concentric outer pill border matching reference design */
-.burgundy-pill::after,
-.nav-option-btn::after {
-  content: '';
-  position: absolute;
-  inset: -4.5px;
-  border-radius: 9999px;
-  border: 1.5px solid #851218;
-  pointer-events: none;
-  transition: all 0.18s ease;
-}
-
 .burgundy-pill:hover,
 .nav-option-btn:hover {
   background-color: #96161d !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(117, 15, 20, 0.32);
-}
-
-.burgundy-pill:hover::after,
-.nav-option-btn:hover::after {
-  border-color: #96161d;
-  inset: -5px;
 }
 
 .burgundy-pill:active,
@@ -333,16 +315,11 @@ input[type="range"]::-moz-range-track {
   background-color: #750f14 !important;
 }
 
+/* Concentric outer ring rendered via box-shadow (never overflows, clips, or triggers scrollbars) */
 .burgundy-pill.active-tab,
 .nav-option-btn.active-tab {
-  background-color: #851218 !important;
-  box-shadow: 0 2px 8px rgba(133, 18, 24, 0.38);
-}
-
-.burgundy-pill.active-tab::after,
-.nav-option-btn.active-tab::after {
-  border-color: #851218;
-  border-width: 1.5px;
+  background-color: #750f14 !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #851218, 0 2px 8px rgba(133, 18, 24, 0.38) !important;
 }
 
 /* Small variant of burgundy pill */
@@ -351,8 +328,70 @@ input[type="range"]::-moz-range-track {
   font-size: 11px !important;
   gap: 0.4rem !important;
 }
-.burgundy-pill-sm::after {
-  inset: -3.5px !important;
+.burgundy-pill-sm.active-tab {
+  box-shadow: 0 0 0 1.5px #ffffff, 0 0 0 3px #851218, 0 2px 6px rgba(133, 18, 24, 0.3) !important;
+}
+
+/* ==========================================================================
+   Category Filter Shortcut Pills (Clean, Aesthetic, No Overflow / No Scrollbar)
+   ========================================================================== */
+#quickCategoryPillContainer {
+  overflow: visible !important;
+}
+
+.cat-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-radius: 9999px;
+  background-color: #851218;
+  color: #ffffff;
+  border: 1px solid #720e13;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(133, 18, 24, 0.2);
+  line-height: 1.25;
+}
+
+.cat-pill.active {
+  background-color: #630c11 !important;
+  color: #ffffff !important;
+  border-color: #550000 !important;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #851218, 0 2px 6px rgba(133, 18, 24, 0.35) !important;
+  transform: translateY(-0.5px);
+}
+
+.cat-pill:not(.active) {
+  opacity: 0.82;
+  background-color: #851218;
+}
+
+.cat-pill:not(.active):hover {
+  opacity: 1;
+  background-color: #9c1c23 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(133, 18, 24, 0.25);
+}
+
+.cat-pill:active {
+  transform: scale(0.97);
+}
+
+/* Hide ugly default browser scrollbar arrows globally */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+::-webkit-scrollbar-corner {
+  background: transparent !important;
 }
 
 /* Cards that already carry a border */
