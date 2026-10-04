@@ -593,7 +593,7 @@ tbody tr {
 
 tbody tr:hover {
   background-color: #fef7f7 !important;
-  transform: translateX(2px);
+  box-shadow: inset 3px 0 0 #851218;
 }
 
 @keyframes rowFadeIn {

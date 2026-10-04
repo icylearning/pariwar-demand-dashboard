@@ -563,6 +563,23 @@ function renderForecastTable(enrichedItems) {
     filtered = filtered.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q));
   }
 
+  // Rearrange data on the basis of sales (highest daily sales velocity & volume first)
+  filtered.sort((a, b) => {
+    const velA = parseFloat(a.effectiveVelocity) || 0;
+    const velB = parseFloat(b.effectiveVelocity) || 0;
+    if (velB !== velA) {
+      return velB - velA; // Descending: fastest selling products on top
+    }
+    const demA = parseFloat(a.projectedDemand) || 0;
+    const demB = parseFloat(b.projectedDemand) || 0;
+    if (demB !== demA) {
+      return demB - demA;
+    }
+    const revA = velA * (a.unitPrice || a.costPrice || 0);
+    const revB = velB * (b.unitPrice || b.costPrice || 0);
+    return revB - revA;
+  });
+
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
@@ -653,9 +670,10 @@ function renderForecastTable(enrichedItems) {
             Est: <span id="poCostDisplay_${item.sku}" class="font-bold text-slate-800">${StockPulse.profile.currency}${item.recommendedPOCost.toLocaleString('en-IN')}</span>
           </div>
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap text-right">
-          <button onclick="openPOModal()" class="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs">
-            PO Draft
+        <td class="px-4 py-3.5 whitespace-nowrap text-center pr-6 min-w-[120px]">
+          <button onclick="openPOModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs whitespace-nowrap inline-flex items-center gap-1.5" title="View PO draft for this item">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-[#851218]"></i>
+            <span>PO Draft</span>
           </button>
         </td>
       </tr>
@@ -769,6 +787,14 @@ function renderVendorPOGroups(enrichedItems) {
     ? itemsNeedingPO 
     : enrichedItems.filter(i => (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0 ? false : true)).slice(0, 20);
 
+  // Rearrange PO list on the basis of sales (highest velocity first)
+  orderList.sort((a, b) => {
+    const velA = parseFloat(a.effectiveVelocity) || 0;
+    const velB = parseFloat(b.effectiveVelocity) || 0;
+    if (velB !== velA) return velB - velA;
+    return (parseFloat(b.projectedDemand) || 0) - (parseFloat(a.projectedDemand) || 0);
+  });
+
   let totalUnits = 0;
   let totalCost = 0;
 
@@ -796,7 +822,7 @@ function renderVendorPOGroups(enrichedItems) {
               <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
             </div>
           </td>
-          <td class="px-4 py-3 text-right font-mono font-bold text-slate-900">
+          <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 pr-6">
             ${StockPulse.profile.currency}${lineCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </td>
         </tr>
@@ -1775,6 +1801,8 @@ function mergeInventoryItems(parsedItems) {
     existing.costPrice = item.costPrice || existing.costPrice;
     existing.currentStock = Math.max(existing.currentStock, item.currentStock);
   });
+  // Sort on the basis of sales (highest daily velocity first)
+  StockPulse.inventory.sort((a, b) => (b.baselineDailyVelocity || 0) - (a.baselineDailyVelocity || 0));
 }
 
 function renderBatchUploadQueue(results) {
@@ -2047,6 +2075,9 @@ function processRetailSalesData(rawContent, sourceName = 'Uploaded Data', option
     if (!skipUi) showToast(error, 'error');
     return { count: 0, error };
   }
+
+  // Rearrange items on the basis of sales (highest baseline daily velocity first)
+  parsedItems.sort((a, b) => (b.baselineDailyVelocity || 0) - (a.baselineDailyVelocity || 0));
 
   if (merge) {
     mergeInventoryItems(parsedItems);
