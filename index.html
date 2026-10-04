@@ -92,19 +92,19 @@
   <div class="min-h-full flex flex-col">
 
     <!-- Top Global App Bar -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-2.5 transition-colors no-print">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 transition-colors no-print">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
         
         <!-- Brand & Store Profiling Info -->
         <div class="flex items-center gap-6">
-          <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Pariwar - Everything Under One Roof" class="h-8 sm:h-10 object-contain">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <img src="logo.png" alt="Pariwar - Everything Under One Roof" class="h-8 sm:h-10 object-contain shrink-0">
             <div>
               <div class="flex items-center gap-1.5">
-                <span class="font-extrabold text-slate-900 tracking-tight text-base">Pariwar</span>
-                <span class="text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200/60">Demand AI</span>
+                <span class="font-extrabold text-slate-900 tracking-tight text-sm sm:text-base">Pariwar</span>
+                <span class="text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200/60">Demand AI</span>
               </div>
-              <span class="text-xs font-semibold text-slate-500 block -mt-0.5">Everything Under One Roof</span>
+              <span class="text-xs font-semibold text-slate-500 hidden sm:block -mt-0.5">Everything Under One Roof</span>
             </div>
           </div>
 
@@ -125,7 +125,7 @@
 
         <!-- Quick Restock CTA, Dark Mode Toggle & Profile -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <button id="globalGeneratePOBtn" onclick="openPOModal()" class="burgundy-pill text-xs py-1.5 px-4 cursor-pointer">
+          <button id="globalGeneratePOBtn" onclick="openPOModal()" class="burgundy-pill text-xs py-1.5 px-3 sm:px-4 cursor-pointer shrink-0">
             <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Quick PO Draft</span>
             <span class="sm:hidden">PO Draft</span>
@@ -170,31 +170,34 @@
     <div class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
       
       <!-- Primary Navigation Tabs (Custom pill style matching design) -->
-      <div class="options-nav-bar p-2 sm:p-2.5 rounded-2xl no-print overflow-x-auto scroll-touch">
-        <nav class="flex items-center gap-2 sm:gap-3 text-xs whitespace-nowrap min-w-max">
-          <div class="nav-option-slot active-slot">
-            <button data-view-target="viewOverview" class="nav-option-btn active-tab cursor-pointer">
-              <i data-lucide="layout-grid" class="w-4 h-4 text-white shrink-0"></i>
-              <span>Health Dashboard</span>
+      <div class="options-nav-bar p-1.5 sm:p-2.5 rounded-2xl no-print sm:overflow-x-auto sm:scroll-touch">
+        <nav class="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-3 text-xs sm:whitespace-nowrap sm:min-w-max">
+          <div class="nav-option-slot active-slot w-full sm:w-auto">
+            <button data-view-target="viewOverview" class="nav-option-btn active-tab cursor-pointer w-full sm:w-auto justify-center text-[11px] sm:text-xs py-2 px-2 sm:px-4">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0"></i>
+              <span class="truncate">Health Dashboard</span>
             </button>
           </div>
-          <div class="nav-option-slot">
-            <button data-view-target="viewIngestion" class="nav-option-btn cursor-pointer">
-              <i data-lucide="cloud-upload" class="w-4 h-4 text-white shrink-0"></i>
-              <span>Data Ingestion &amp; Mapping</span>
+          <div class="nav-option-slot w-full sm:w-auto">
+            <button data-view-target="viewIngestion" class="nav-option-btn cursor-pointer w-full sm:w-auto justify-center text-[11px] sm:text-xs py-2 px-2 sm:px-4">
+              <i data-lucide="cloud-upload" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0"></i>
+              <span class="hidden sm:inline">Data Ingestion &amp; Mapping</span>
+              <span class="sm:hidden truncate">Data Ingestion</span>
             </button>
           </div>
-          <div class="nav-option-slot">
-            <button data-view-target="viewForecast" class="nav-option-btn cursor-pointer">
-              <i data-lucide="trending-up" class="w-4 h-4 text-white shrink-0"></i>
-              <span>Demand Forecast &amp; Sliders</span>
+          <div class="nav-option-slot w-full sm:w-auto">
+            <button data-view-target="viewForecast" class="nav-option-btn cursor-pointer w-full sm:w-auto justify-center text-[11px] sm:text-xs py-2 px-2 sm:px-4">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0"></i>
+              <span class="hidden sm:inline">Demand Forecast &amp; Sliders</span>
+              <span class="sm:hidden truncate">Demand Forecast</span>
             </button>
           </div>
-          <div class="nav-option-slot">
-            <button data-view-target="viewPurchaseOrders" class="nav-option-btn cursor-pointer">
-              <i data-lucide="package-check" class="w-4 h-4 text-white shrink-0"></i>
-              <span>Purchase Orders (POs)</span>
-              <i data-lucide="sparkle" class="w-3.5 h-3.5 text-rose-200/90 shrink-0 ml-0.5"></i>
+          <div class="nav-option-slot w-full sm:w-auto">
+            <button data-view-target="viewPurchaseOrders" class="nav-option-btn cursor-pointer w-full sm:w-auto justify-center text-[11px] sm:text-xs py-2 px-2 sm:px-4">
+              <i data-lucide="package-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0"></i>
+              <span class="hidden sm:inline">Purchase Orders (POs)</span>
+              <span class="sm:hidden truncate">Purchase Orders</span>
+              <i data-lucide="sparkle" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-rose-200/90 shrink-0 ml-0.5 hidden sm:inline"></i>
             </button>
           </div>
         </nav>
@@ -208,7 +211,7 @@
       <section id="viewOverview" data-view-section class="space-y-6">
         
         <!-- Store Overview Status Bar (Aesthetic header strip) -->
-        <div class="p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-white border-2 border-gray-300 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-red-50 border-2 border-red-200 flex items-center justify-center text-[#550000] font-bold text-sm shrink-0">
               <i data-lucide="store" class="w-5 h-5"></i>
@@ -222,14 +225,14 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <button onclick="switchMainView('viewIngestion')" class="burgundy-pill text-xs py-1.5 px-4 cursor-pointer">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-              <span>Upload Sales File</span>
+          <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 w-full md:w-auto">
+            <button onclick="switchMainView('viewIngestion')" class="burgundy-pill text-xs py-1.5 px-2.5 sm:px-4 cursor-pointer flex items-center justify-center gap-1.5 w-full sm:w-auto">
+              <i data-lucide="upload" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">Upload Sales File</span>
             </button>
-            <button onclick="switchMainView('viewPurchaseOrders')" class="burgundy-pill text-xs py-1.5 px-4 cursor-pointer">
-              <i data-lucide="package" class="w-3.5 h-3.5"></i>
-              <span>Purchase Orders</span>
+            <button onclick="switchMainView('viewPurchaseOrders')" class="burgundy-pill text-xs py-1.5 px-2.5 sm:px-4 cursor-pointer flex items-center justify-center gap-1.5 w-full sm:w-auto">
+              <i data-lucide="package" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">Purchase Orders</span>
             </button>
           </div>
         </div>
@@ -298,17 +301,17 @@
         </div>
 
         <!-- Urgent Stockout Risk Alert Banner (Red Bordered) -->
-        <div id="stockoutAlertBanner" class="p-4 rounded-2xl bg-rose-50 border-2 border-red-500 shadow-sm transition-all">
-          <div class="flex items-center justify-between mb-2">
+        <div id="stockoutAlertBanner" class="p-3.5 sm:p-4 rounded-2xl bg-rose-50 border-2 border-red-500 shadow-sm transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2.5">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-600 pulse-dot"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-600 pulse-dot shrink-0"></span>
               <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider">Critical Stockout Warnings</h3>
-              <span id="urgentCountBadge" class="text-[11px] font-semibold text-rose-700 bg-rose-100 px-2 py-0.2 rounded-full">2 critical</span>
+              <span id="urgentCountBadge" class="text-[10px] sm:text-[11px] font-semibold text-rose-700 bg-rose-100 px-2 py-0.2 rounded-full shrink-0">2 critical</span>
             </div>
-            <span class="text-xs text-rose-600 font-medium">Reorder immediately to maintain supplier lead times</span>
+            <span class="text-[11px] sm:text-xs text-rose-600 font-medium hidden sm:inline">Reorder immediately to maintain supplier lead times</span>
           </div>
 
-          <div id="stockoutAlertItems" class="space-y-1">
+          <div id="stockoutAlertItems" class="space-y-1.5 sm:space-y-1">
             <!-- Dynamically populated via JavaScript -->
           </div>
         </div>

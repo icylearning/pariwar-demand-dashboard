@@ -487,12 +487,12 @@ function updateStockoutAlertBanner(health) {
     banner.classList.remove('hidden');
     if (countBadge) countBadge.textContent = 'Awaiting data';
     alertList.innerHTML = `
-      <div class="flex items-center justify-between text-xs py-2 text-rose-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs py-2 text-rose-700">
         <div class="flex items-center gap-2">
-          <i data-lucide="info" class="w-4 h-4"></i>
+          <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
           <span>No sales data ingested yet. Upload your store's sales records to detect stockouts and reorder thresholds.</span>
         </div>
-        <button onclick="switchMainView('viewIngestion')" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md transition-colors shadow-2xs cursor-pointer">
+        <button onclick="switchMainView('viewIngestion')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md transition-colors shadow-2xs cursor-pointer w-full sm:w-auto shrink-0 text-center">
           Upload Sales Data
         </button>
       </div>
@@ -514,16 +514,23 @@ function updateStockoutAlertBanner(health) {
 
   banner.classList.remove('hidden');
   alertList.innerHTML = urgentItems.map(item => `
-    <div class="flex items-center justify-between text-xs py-1.5 border-b border-rose-100 last:border-0">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-        <span class="font-semibold text-slate-900">${item.name}</span>
-        <span class="text-slate-400 font-mono">(${item.sku})</span>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 text-xs py-2 sm:py-1.5 border-b border-rose-200/60 last:border-0">
+      <div class="flex items-center justify-between sm:justify-start gap-2 min-w-0">
+        <div class="flex items-center gap-2 truncate">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+          <span class="font-semibold text-slate-900 truncate">${item.name}</span>
+          <span class="text-slate-400 font-mono text-[11px] shrink-0">(${item.sku})</span>
+        </div>
+        <span class="sm:hidden text-rose-700 font-bold text-[10px] shrink-0 bg-rose-100 px-2 py-0.5 rounded-full border border-rose-200">
+          ${item.daysToStockout}d left
+        </span>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="text-rose-600 font-semibold">Runs out in ${item.daysToStockout} days</span>
-        <span class="text-slate-500 text-[11px]">(Lead time: ${item.leadTimeDays}d)</span>
-        <button onclick="openPOModalForSupplier('${item.supplier}')" class="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white font-medium text-[11px] transition-colors cursor-pointer">
+      <div class="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <span class="hidden sm:inline text-rose-600 font-semibold">Runs out in ${item.daysToStockout} days</span>
+          <span class="text-slate-500 text-[11px]">(Lead time: ${item.leadTimeDays}d)</span>
+        </div>
+        <button onclick="openPOModalForSupplier('${item.supplier}')" class="px-2.5 py-1 sm:py-0.5 rounded-lg sm:rounded bg-rose-600 hover:bg-rose-700 text-white font-medium text-[11px] transition-colors cursor-pointer shrink-0">
           Reorder ${item.recommendedPOQty} units
         </button>
       </div>
