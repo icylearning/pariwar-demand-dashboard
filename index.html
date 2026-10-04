@@ -630,16 +630,16 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border-2 border-slate-700 rounded-xl bg-slate-50 shadow-inner">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border-2 border-gray-300 rounded-2xl bg-white shadow-2xs">
             
             <!-- Slider 1: Forecast Horizon -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <label class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
-                  Prediction Window (Horizon)
+                  <i data-lucide="calendar" class="w-4 h-4 text-[#851218]"></i>
+                  <span>Prediction Window (Horizon)</span>
                 </label>
-                <span id="horizonSliderVal" class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">7 Days</span>
+                <span id="horizonSliderVal" class="text-xs font-mono font-bold text-[#851218] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-full">7 Days</span>
               </div>
               <input type="range" id="horizonSlider" min="7" max="60" step="1" value="7">
               <div class="flex justify-between text-[10px] text-slate-400 mt-1">
@@ -653,10 +653,10 @@
             <div>
               <div class="flex items-center justify-between mb-2">
                 <label class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
-                  Festival / Seasonal Demand Multiplier
+                  <i data-lucide="sparkles" class="w-4 h-4 text-[#851218]"></i>
+                  <span>Festival / Seasonal Demand Multiplier</span>
                 </label>
-                <span id="surgeSliderVal" class="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">+15%</span>
+                <span id="surgeSliderVal" class="text-xs font-mono font-bold text-[#851218] bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-full">+15%</span>
               </div>
               <input type="range" id="surgeSlider" min="0" max="50" step="5" value="15">
               <div class="flex justify-between text-[10px] text-slate-400 mt-1">
@@ -741,7 +741,7 @@
             </div>
 
             <!-- Bucket Filter Pills (Burgundy Pill Options) -->
-            <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex flex-wrap items-center gap-2">
               <button data-bucket-filter="all" class="burgundy-pill burgundy-pill-sm active-tab cursor-pointer">All SKUs</button>
               <button data-bucket-filter="fast-movers" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Fast Movers</button>
               <button data-bucket-filter="steady" class="burgundy-pill burgundy-pill-sm opacity-80 cursor-pointer">Steady Stock</button>
@@ -750,10 +750,44 @@
             </div>
           </div>
 
-          <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b-2 border-gray-300 dark:border-slate-800 flex items-center justify-between">
+          <!-- Category / Item Type Filter Option Bar (Requirement 3) -->
+          <div class="px-5 py-3 bg-slate-50/90 border-b-2 border-gray-300 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-800 flex items-center gap-1.5 shrink-0">
+                <i data-lucide="layers" class="w-4 h-4 text-[#851218]"></i>
+                <span>Categorize by Type:</span>
+              </span>
+              <select id="categoryFilterSelect" onchange="setCategoryFilter(this.value)" class="burgundy-pill burgundy-pill-sm active-tab py-1.5 px-3 cursor-pointer outline-none font-semibold">
+                <option value="all" class="bg-white text-slate-900">All Product Types (Show All)</option>
+                <option value="Beverages" class="bg-white text-slate-900">Beverages (Tea, Coffee, Juices)</option>
+                <option value="Dairy" class="bg-white text-slate-900">Dairy (Milk, Butter, Paneer, Ghee)</option>
+                <option value="Soft Drinks" class="bg-white text-slate-900">Soft Drinks (Coke, Pepsi, Sprite)</option>
+                <option value="Spices" class="bg-white text-slate-900">Spices (Masalas, Haldi, Mirchi, Jeera)</option>
+                <option value="Pulses" class="bg-white text-slate-900">Pulses (Dals, Moong, Chana, Grains)</option>
+                <option value="Oils" class="bg-white text-slate-900">Oils (Cooking &amp; Mustard Oils)</option>
+                <option value="Biscuits & Snacks" class="bg-white text-slate-900">Biscuits &amp; Snacks</option>
+                <option value="Chocolates" class="bg-white text-slate-900">Chocolates &amp; Confectionery</option>
+                <option value="Personal Care" class="bg-white text-slate-900">Personal Care &amp; Hygiene</option>
+                <option value="Ice Creams" class="bg-white text-slate-900">Ice Creams &amp; Frozen</option>
+              </select>
+            </div>
+
+            <!-- Quick Category Shortcut Pills -->
+            <div class="flex flex-wrap items-center gap-1.5 overflow-x-auto scroll-touch" id="quickCategoryPillContainer">
+              <button type="button" onclick="setCategoryFilter('all')" data-cat-pill="all" class="burgundy-pill burgundy-pill-sm active-tab py-1 px-2.5 text-[11px] cursor-pointer">All</button>
+              <button type="button" onclick="setCategoryFilter('Beverages')" data-cat-pill="Beverages" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Beverages</button>
+              <button type="button" onclick="setCategoryFilter('Dairy')" data-cat-pill="Dairy" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Dairy</button>
+              <button type="button" onclick="setCategoryFilter('Soft Drinks')" data-cat-pill="Soft Drinks" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Soft Drinks</button>
+              <button type="button" onclick="setCategoryFilter('Spices')" data-cat-pill="Spices" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Spices</button>
+              <button type="button" onclick="setCategoryFilter('Pulses')" data-cat-pill="Pulses" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Pulses</button>
+              <button type="button" onclick="setCategoryFilter('Oils')" data-cat-pill="Oils" class="burgundy-pill burgundy-pill-sm opacity-80 py-1 px-2.5 text-[11px] cursor-pointer">Oils</button>
+            </div>
+          </div>
+
+          <div class="px-5 py-3 bg-white border-b-2 border-gray-300 flex items-center justify-between">
             <div class="relative w-full max-w-xs">
               <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-              <input id="skuSearchInput" type="text" placeholder="Search SKU, item name or category..." class="w-full bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-600">
+              <input id="skuSearchInput" type="text" placeholder="Search SKU, item name or category..." class="w-full bg-white border-2 border-gray-300 rounded-xl pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-600">
             </div>
             <span class="text-xs text-slate-400">Auto-calculated using 95% service level safety stocks</span>
           </div>

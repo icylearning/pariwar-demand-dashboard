@@ -20,6 +20,7 @@ const StockPulse = {
   weeklyWeekendSurge: true, // +25% spike on Saturday and Sunday
   forecastModel: 'auto', // 'auto', 'holt-winters', 'croston-sba', 'adaptive-wma'
   activeFilterBucket: 'all', // 'all', 'fast-movers', 'steady', 'dead-stock', 'urgent'
+  activeCategoryFilter: 'all', // 'all', 'Beverages', 'Dairy', 'Soft Drinks', 'Spices', 'Pulses', 'Oils', etc.
   selectedSkusForPO: new Set(),
   customPOQty: {}, // User-edited PO quantities per SKU (Instruction 1)
 
@@ -315,22 +316,25 @@ function renderAllViews() {
   // 2. Urgent Stockout Banner
   updateStockoutAlertBanner(health);
 
-  // 3. Forecast Table
+  // 3. Category Filter Dropdown & Counts
+  updateCategoryDropdown(health.enriched);
+
+  // 4. Forecast Table
   renderForecastTable(health.enriched);
 
-  // 4. Expiry / Shelf-Life Table
+  // 5. Expiry / Shelf-Life Table
   renderExpiryTable(health.enriched);
 
-  // 5. Vendor Grouped Purchase Orders
+  // 6. Vendor Grouped Purchase Orders
   renderVendorPOGroups(health.enriched);
 
-  // 6. Charts
+  // 7. Charts
   renderCharts(health.enriched);
 
-  // 7. Weekly Sales Intelligence
+  // 8. Weekly Sales Intelligence
   renderWeeklySalesIntelligence(health.enriched);
 
-  // 8. Store Highlights & Operational Intelligence
+  // 9. Store Highlights & Operational Intelligence
   renderStoreHighlights(health.enriched);
 
   if (window.lucide) window.lucide.createIcons();
@@ -507,7 +511,7 @@ function renderForecastTable(enrichedItems) {
   const tbody = document.getElementById('forecastTableBody');
   if (!tbody) return;
 
-  // Filter items
+  // Filter items by bucket
   let filtered = enrichedItems;
   if (StockPulse.activeFilterBucket === 'fast-movers') {
     filtered = enrichedItems.filter(i => i.bucket === 'fast-movers');
@@ -519,11 +523,17 @@ function renderForecastTable(enrichedItems) {
     filtered = enrichedItems.filter(i => i.isUrgentStockout || i.isHighRisk);
   }
 
+  // Filter by category / item type (Requirement 3)
+  if (StockPulse.activeCategoryFilter && StockPulse.activeCategoryFilter !== 'all') {
+    const qCat = StockPulse.activeCategoryFilter.toLowerCase();
+    filtered = filtered.filter(i => (i.category || '').toLowerCase().includes(qCat));
+  }
+
   // Search filter
   const searchInput = document.getElementById('skuSearchInput');
   if (searchInput && searchInput.value.trim()) {
     const q = searchInput.value.toLowerCase().trim();
-    filtered = filtered.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
+    filtered = filtered.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q));
   }
 
   if (filtered.length === 0) {
@@ -532,10 +542,10 @@ function renderForecastTable(enrichedItems) {
         <td colspan="7" class="px-6 py-12 text-center text-slate-400">
           <div class="flex flex-col items-center justify-center">
             <i data-lucide="inbox" class="w-8 h-8 mb-2 stroke-slate-300"></i>
-            <p class="font-semibold text-slate-700 text-sm">No sales or inventory data loaded yet.</p>
-            <p class="text-xs text-slate-400 mt-1">Upload your POS sales CSV/Excel in "Data Ingestion & Mapping" to generate forecasts.</p>
-            <button onclick="switchMainView('viewIngestion')" class="mt-3 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-2xs">
-              Go to Data Ingestion
+            <p class="font-semibold text-slate-700 text-sm">No items found matching the selected category and filters.</p>
+            <p class="text-xs text-slate-400 mt-1">Try switching to "All Categories" or upload additional POS sales data.</p>
+            <button onclick="setCategoryFilter('all')" class="burgundy-pill text-xs py-1.5 px-4 mt-3 cursor-pointer">
+              Show All Categories
             </button>
           </div>
         </td>
@@ -575,7 +585,17 @@ function renderForecastTable(enrichedItems) {
           <div class="flex items-center gap-2">
             <div>
               <div class="text-xs font-semibold text-slate-900">${item.name}</div>
-              <div class="text-[11px] text-slate-400 font-mono">${item.sku} &bull; ${item.category}</div>
+              <div class="text-[11px] text-slate-400 font-mono">${item.sku} &bull; ${item.supplier}</div>
+              <!-- Website Unit Cost and Clickable Category Badge (Requirements 2 & 3) -->
+              <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                <span class="inline-flex items-center gap-1 text-[10px] font-semibold bg-rose-50 text-[#851218] border border-rose-200/80 px-2 py-0.5 rounded-full cursor-pointer hover:bg-rose-100 transition-colors" onclick="setCategoryFilter('${item.category}')" title="Click to filter by ${item.category}">
+                  <i data-lucide="tag" class="w-2.5 h-2.5"></i>
+                  ${item.category}
+                </span>
+                <span class="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                  Unit Cost: <strong class="text-slate-900 font-bold">${StockPulse.profile.currency}${(item.costPrice || 0).toFixed(2)}</strong>
+                </span>
+              </div>
             </div>
             ${bucketBadge}
           </div>
@@ -1389,21 +1409,71 @@ function isIgnoredColumn(header) {
 // Infer Category based on product title keywords
 function inferCategory(title) {
   const t = title.toUpperCase();
-  if (t.includes('ICE CR') || t.includes('ICE ') || t.includes('I/C') || t.includes('CONE') || 
-      t.includes('CHOCOBAR') || t.includes('KULFI') || t.includes('FRENCH FRIES')) {
-    return 'Ice Creams & Frozen Desserts';
+
+  // 1. Spices & Masalas
+  if (t.includes('TURMERIC') || t.includes('HALDI') || t.includes('MIRCH') || t.includes('CHILLI') || 
+      t.includes('CHILI') || t.includes('DHANIYA') || t.includes('CORIANDER') || t.includes('JEERA') || 
+      t.includes('CUMIN') || t.includes('GARAM MASALA') || t.includes('MASALA') || t.includes('KASURI METHI') || 
+      t.includes('HING') || t.includes('PEPPER') || t.includes('CARDAMOM') || t.includes('ELACHI') || 
+      t.includes('CLOVE') || t.includes('LAVANG') || t.includes('CINNAMON') || t.includes('DALCHINI') || 
+      t.includes('MUSTARD SEED') || t.includes('RAI') || t.includes('EVEREST') || t.includes('MDH') || 
+      t.includes('BADSHAH') || t.includes('CATCH') || t.includes('SUHANA') || t.includes('RAMDEV') || 
+      t.includes('MTR') || t.includes('SAMBAR') || t.includes('RASAM')) {
+    return 'Spices';
   }
+
+  // 2. Pulses & Grains
+  if (t.includes('DAL') || t.includes('TOOR') || t.includes('TUR') || t.includes('MOONG') || 
+      t.includes('MUNG') || t.includes('CHANA') || t.includes('URAD') || t.includes('MASOOR') || 
+      t.includes('RAJMA') || t.includes('KABULI') || t.includes('BESAN') || t.includes('SOYA CHUNK') || 
+      t.includes('LOBIA') || t.includes('VATANA') || t.includes('PULSE') || t.includes('RICE') || 
+      t.includes('BASMATI') || t.includes('ATTA') || t.includes('MAIDA') || t.includes('SUJI') || 
+      t.includes('RAVA') || t.includes('POHA') || t.includes('WHEAT')) {
+    return 'Pulses';
+  }
+
+  // 3. Edible Oils & Cooking Fats
+  if (t.includes('SUNFLOWER') || t.includes('GROUNDNUT') || t.includes('MUSTARD OIL') || t.includes('SARSON') || 
+      t.includes('RICE BRAN') || t.includes('SOYABEAN OIL') || t.includes('SOYA OIL') || t.includes('TIL OIL') || 
+      t.includes('SESAME OIL') || t.includes('FORTUNE') || t.includes('SAFFOLA') || t.includes('GEMINI') || 
+      t.includes('DHARA') || t.includes('FREEDOM') || t.includes('EMAMI') || t.includes('GULAB OIL') || 
+      t.includes('REFINED OIL') || t.includes('KACHI GHANI') || t.includes('COOKING OIL') || (t.includes(' OIL') && !t.includes('HAIR OIL'))) {
+    return 'Oils';
+  }
+
+  // 4. Soft Drinks
+  if (t.includes('FANTA') || t.includes('SPRITE') || t.includes('THUMS UP') || t.includes('COCA') || 
+      t.includes('COKE') || t.includes('PEPSI') || t.includes('LIMCA') || t.includes('7UP') || 
+      t.includes('MIRINDA') || t.includes('MOUNTAIN DEW') || t.includes('STING') || t.includes('SODA') || 
+      t.includes('APPLETISER') || t.includes('RED BULL')) {
+    return 'Soft Drinks';
+  }
+
+  // 5. Dairy
   if (t.includes('BUTTER') || t.includes('CHEESE') || t.includes('CHEES') || t.includes('PANEER') || 
       t.includes('GHEE') || t.includes('MILK') || t.includes('CREAM') || t.includes('SHRIKHAND') || 
       t.includes('AMRAKHAND') || t.includes('MITHAI MATE') || t.includes('LASSI') || t.includes('BUTTERMILK') ||
-      t.includes('MASTI') || t.includes('TAAZA')) {
-    return 'Dairy, Butter & Cheese';
+      t.includes('MASTI') || t.includes('TAAZA') || t.includes('DAHI') || t.includes('CURD')) {
+    return 'Dairy';
   }
-  if (t.includes('FANTA') || t.includes('SPRITE') || t.includes('THUMS UP') || t.includes('COCA') || 
-      t.includes('PEPSI') || t.includes('KOOL') || t.includes('SHAKERS') || t.includes('BTL') || 
-      t.includes('CAN ') || t.includes('MAAZA') || t.includes('LIMCA') || t.includes('7UP') || t.includes('MIRINDA')) {
-    return 'Beverages & Soft Drinks';
+
+  // 6. Beverages (Tea, Coffee, Juices, Health Drinks)
+  if (t.includes('TEA') || t.includes('CHAI') || t.includes('COFFEE') || t.includes('NESCAFE') || 
+      t.includes('BRU') || t.includes('TAJ MAHAL') || t.includes('RED LABEL') || t.includes('WAGH BAKRI') || 
+      t.includes('TATA TEA') || t.includes('JUICE') || t.includes('REAL JUICE') || t.includes('TROPICANA') || 
+      t.includes('MAAZA') || t.includes('FROOTI') || t.includes('SLICE') || t.includes('ROOH AFZA') || 
+      t.includes('RASNA') || t.includes('TANG') || t.includes('BOURNVITA') || t.includes('HORLICKS') || 
+      t.includes('COMPLAN') || t.includes('SHAKERS') || t.includes('KOOL') || t.includes('BEVERAGE')) {
+    return 'Beverages';
   }
+
+  // 7. Ice Creams & Frozen Desserts
+  if (t.includes('ICE CR') || t.includes('ICE ') || t.includes('I/C') || t.includes('CONE') || 
+      t.includes('CHOCOBAR') || t.includes('KULFI') || t.includes('FRENCH FRIES')) {
+    return 'Ice Creams';
+  }
+
+  // 8. Chocolates & Confectionery
   if (t.includes('CHOCOLATE') || t.includes('CHOC') || t.includes('SILK') || t.includes('5 STAR') || 
       t.includes('5STAR') || t.includes('GEMS') || t.includes('SNICKERS') || t.includes('GALAXY') || 
       t.includes('TOFFEE') || t.includes('ECLAIRS') || t.includes('JELLY') || t.includes('CANDIES') || 
@@ -1411,31 +1481,34 @@ function inferCategory(title) {
       t.includes('CHUPA') || t.includes('CENTER FRESH') || t.includes('CENTER FRUIT') || t.includes('KOPIKO') || 
       t.includes('LOTTE') || t.includes('CRISPELLO') || t.includes('PERK') || t.includes('FUSE') || 
       t.includes('BOURNVILLE') || t.includes('CELEBRATIONS') || t.includes('LICKABLES') || t.includes('SHOTS')) {
-    return 'Chocolates & Confectionery';
+    return 'Chocolates';
   }
-  if (t.includes('BOURNVITA') || t.includes('TANG') || t.includes('CHYAWANPRASH') || t.includes('HONEY') || t.includes('PRO CHOCOLATE')) {
-    return 'Health Drinks & Nutrition';
-  }
+
+  // 9. Personal Care & Grooming
   if (t.includes('PASTE') || t.includes('BABOOL') || t.includes('MESWAK') || t.includes('RED TOOTH') || 
-      t.includes('MANJAN') || t.includes('TOUNG CLEANER') || t.includes('ORBIT') || t.includes('HAPPYDENT')) {
-    return 'Oral Care & Hygiene';
+      t.includes('MANJAN') || t.includes('TOUNG CLEANER') || t.includes('ORBIT') || t.includes('HAPPYDENT') || 
+      t.includes('HAIR OIL') || t.includes('SHAMPOO') || t.includes('BLEACH') || t.includes('VATIKA') || 
+      t.includes('GULABARI') || t.includes('FEM') || t.includes('OXY LIFE') || t.includes('COOL KING') || 
+      t.includes('DEO') || t.includes('PERFUM') || t.includes('SPRAY') || t.includes('WILD STONE') || 
+      t.includes('SECRET TEMPTATION') || t.includes('WILD STO') || t.includes('SOAP')) {
+    return 'Personal Care';
   }
-  if (t.includes('HAIR OIL') || t.includes('SHAMPOO') || t.includes('BLEACH') || t.includes('VATIKA') || 
-      t.includes('GULABARI') || t.includes('FEM') || t.includes('OXY LIFE') || t.includes('COOL KING')) {
-    return 'Personal Care & Grooming';
-  }
-  if (t.includes('DEO') || t.includes('PERFUM') || t.includes('SPRAY') || t.includes('WILD STONE') || 
-      t.includes('SECRET TEMPTATION') || t.includes('WILD STO')) {
-    return 'Fragrances & Deodorants';
-  }
-  if (t.includes('ODOMOS') || t.includes('ODONIL') || t.includes('FRESHNER') || t.includes('AIR FRESHNER') || t.includes('OURA')) {
-    return 'Home & Mosquito Hygiene';
-  }
+
+  // 10. Biscuits & Bakery Snacks
   if (t.includes('BISCUIT') || t.includes('COOKIE') || t.includes('OREO') || t.includes('WAFER') || 
       t.includes('NABATI') || t.includes('MALKIST') || t.includes('BAKARWADI') || t.includes('BHEL') || 
-      t.includes('CHOCOBAK') || t.includes('CHOCOBHAKES')) {
-    return 'Biscuits & Bakery Snacks';
+      t.includes('CHOCOBAK') || t.includes('CHOCOBHAKES') || t.includes('NAMKEEN') || t.includes('CHIPS') || 
+      t.includes('KURKURE') || t.includes('LAYS') || t.includes('BHUJIA')) {
+    return 'Biscuits & Snacks';
   }
+
+  // 11. Household & Hygiene
+  if (t.includes('ODOMOS') || t.includes('ODONIL') || t.includes('FRESHNER') || t.includes('AIR FRESHNER') || 
+      t.includes('OURA') || t.includes('DETERGENT') || t.includes('SURF') || t.includes('TIDE') || 
+      t.includes('ARIEL') || t.includes('VIM') || t.includes('HARPIC')) {
+    return 'Household & Hygiene';
+  }
+
   return 'Packaged FMCG';
 }
 
@@ -2442,16 +2515,13 @@ window.sendPOViaWhatsApp = function(supplierName = null) {
   const deliveryDate = new Date(Date.now() + leadDays * 86400000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  let subtotal = 0;
+  let totalUnits = 0;
   const itemsText = orderList.map((item, idx) => {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
-    const lineCost = +(qty * item.costPrice).toFixed(2);
-    subtotal += lineCost;
-    return `${idx + 1}. *${item.name}* (${item.sku})\n   Qty: ${qty} units @ ${StockPulse.profile.currency}${item.costPrice.toFixed(2)} = ${StockPulse.profile.currency}${lineCost.toLocaleString('en-IN')}`;
+    totalUnits += qty;
+    return `${idx + 1}. *${item.name}* (${item.sku})\n   Quantity: ${qty} units`;
   }).join('\n');
 
-  const tax = +(subtotal * 0.05).toFixed(2);
-  const total = +(subtotal + tax).toFixed(2);
   const vendorPhone = supplierItems[0]?.supplierPhone || '';
   const cleanPhone = vendorPhone.replace(/[^0-9]/g, '');
 
@@ -2466,9 +2536,8 @@ window.sendPOViaWhatsApp = function(supplierName = null) {
 ${itemsText}
 
 ----------------------------------------
-*Subtotal:* ${StockPulse.profile.currency}${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-*Est. Tax (5%):* ${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-*Total Balance:* ${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+*Total SKUs:* ${orderList.length}
+*Total Units:* ${totalUnits} units
 
 _Generated via StockPulse AI Retail Engine_
 Please confirm order receipt and shipping schedule. Thank you!`;
@@ -2483,6 +2552,94 @@ Please confirm order receipt and shipping schedule. Thank you!`;
   // Also display visual modal for this supplier
   window.openPOModal(chosenSupplier);
 };
+
+// ============================================================================
+// Category / Item Type Filter & Dynamic Mapping Helpers (Requirement 3)
+// ============================================================================
+window.setCategoryFilter = function(category) {
+  StockPulse.activeCategoryFilter = category || 'all';
+
+  // Sync dropdown
+  const select = document.getElementById('categoryFilterSelect');
+  if (select) {
+    const exists = Array.from(select.options).some(opt => opt.value.toLowerCase() === StockPulse.activeCategoryFilter.toLowerCase());
+    if (!exists && StockPulse.activeCategoryFilter !== 'all') {
+      const opt = document.createElement('option');
+      opt.value = StockPulse.activeCategoryFilter;
+      opt.textContent = StockPulse.activeCategoryFilter;
+      opt.className = 'bg-white text-slate-900';
+      select.appendChild(opt);
+    }
+    select.value = StockPulse.activeCategoryFilter;
+  }
+
+  // Sync quick shortcut pills
+  const pills = document.querySelectorAll('[data-cat-pill]');
+  pills.forEach(pill => {
+    const pillCat = pill.getAttribute('data-cat-pill');
+    const isMatch = pillCat.toLowerCase() === StockPulse.activeCategoryFilter.toLowerCase();
+    pill.classList.toggle('active-tab', isMatch);
+    pill.classList.toggle('opacity-80', !isMatch);
+  });
+
+  const health = computeAggregateHealth();
+  renderForecastTable(health.enriched);
+  showToast(`Filtered by Category: ${StockPulse.activeCategoryFilter === 'all' ? 'All Products' : StockPulse.activeCategoryFilter}`, 'info');
+};
+
+window.updateItemCategory = function(sku, newCategory) {
+  const item = StockPulse.inventory.find(i => i.sku === sku);
+  if (item) {
+    item.category = newCategory;
+    renderAllViews();
+    showToast(`Updated category for ${item.name} to ${newCategory}`, 'success');
+  }
+};
+
+function updateCategoryDropdown(enrichedItems) {
+  const select = document.getElementById('categoryFilterSelect');
+  if (!select) return;
+
+  const currentVal = StockPulse.activeCategoryFilter || 'all';
+
+  // Collect standard and active categories
+  const categories = new Set([
+    'Beverages',
+    'Dairy',
+    'Soft Drinks',
+    'Spices',
+    'Pulses',
+    'Oils',
+    'Biscuits & Snacks',
+    'Chocolates',
+    'Personal Care',
+    'Ice Creams'
+  ]);
+
+  if (enrichedItems && enrichedItems.length > 0) {
+    enrichedItems.forEach(i => {
+      if (i.category) categories.add(i.category);
+    });
+  }
+
+  // Count items per category
+  const counts = {};
+  if (enrichedItems) {
+    enrichedItems.forEach(i => {
+      counts[i.category] = (counts[i.category] || 0) + 1;
+    });
+  }
+
+  let html = `<option value="all" class="bg-white text-slate-900">All Product Types (${enrichedItems ? enrichedItems.length : 0} SKUs)</option>`;
+  Array.from(categories).sort().forEach(cat => {
+    const count = counts[cat] || 0;
+    const isSelected = cat.toLowerCase() === currentVal.toLowerCase() ? 'selected' : '';
+    html += `<option value="${cat}" ${isSelected} class="bg-white text-slate-900">${cat} (${count})</option>`;
+  });
+
+  select.innerHTML = html;
+  select.value = currentVal;
+}
 
 // ============================================================================
 // Toast Notification Utility
