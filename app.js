@@ -292,8 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   setupDragAndDrop();
 
-  // Load Pariwar Supermarket sales data by default so the dashboard is immediately active and rich
-  loadPariwarSalesData({ initialLoad: true });
+  // Fresh start: no preloaded data
+  StockPulse.inventory = [];
+  StockPulse.rawUploadedRows = [];
+  StockPulse.rawHeaders = [];
+  StockPulse.uploadedFilename = '';
+  StockPulse.selectedSkusForPO.clear();
+  StockPulse.customPOQty = {};
+
+  renderAllViews();
 
   if (window.lucide) window.lucide.createIcons();
 });
@@ -344,14 +351,22 @@ function updateHealthCards(health) {
   if (reorderCost) reorderCost.textContent = `${sym}${health.totalReorderNeededCost.toLocaleString('en-IN')}`;
 
   const urgentBadge = document.getElementById('urgentCountBadge');
-  if (urgentBadge) urgentBadge.textContent = `${health.urgentStockoutCount} critical`;
+  if (urgentBadge) urgentBadge.textContent = StockPulse.inventory.length === 0 ? 'Awaiting data' : `${health.urgentStockoutCount} critical`;
 }
 
 function renderStoreHighlights(enrichedItems) {
-  if (!enrichedItems || enrichedItems.length === 0) return;
+  const fastMoversList = document.getElementById('overviewFastMoversList');
+  const categoryList = document.getElementById('overviewCategoryList');
+  const vendorList = document.getElementById('overviewVendorList');
+
+  if (!enrichedItems || enrichedItems.length === 0) {
+    if (fastMoversList) fastMoversList.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Upload sales records to see velocity champions</p>`;
+    if (categoryList) categoryList.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Upload sales records to see category share</p>`;
+    if (vendorList) vendorList.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Upload sales records to see vendor dispatch</p>`;
+    return;
+  }
 
   // 1. Top 5 Velocity Champions
-  const fastMoversList = document.getElementById('overviewFastMoversList');
   if (fastMoversList) {
     const sortedByVelocity = [...enrichedItems].sort((a, b) => b.effectiveVelocity - a.effectiveVelocity).slice(0, 5);
     fastMoversList.innerHTML = sortedByVelocity.map((item, idx) => `
@@ -372,7 +387,6 @@ function renderStoreHighlights(enrichedItems) {
   }
 
   // 2. Category Contribution
-  const categoryList = document.getElementById('overviewCategoryList');
   if (categoryList) {
     const categoryTotals = {};
     let totalVolume = 0;
@@ -402,7 +416,6 @@ function renderStoreHighlights(enrichedItems) {
   }
 
   // 3. Supplier Restock Dispatch Status
-  const vendorList = document.getElementById('overviewVendorList');
   if (vendorList) {
     const supplierMap = {};
     enrichedItems.forEach(item => {
