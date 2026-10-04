@@ -165,25 +165,34 @@
     <!-- Main Container Layout with Sub-Navigation Tabs -->
     <div class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
       
-      <!-- Primary Navigation Tabs -->
-      <div class="p-1.5 sm:p-2 rounded-2xl bg-slate-100/90 border-2 border-gray-300 no-print overflow-x-auto scroll-touch shadow-xs">
-        <nav class="flex space-x-2 text-xs whitespace-nowrap min-w-max">
-          <button data-view-target="viewOverview" class="nav-tab-btn active-tab px-4 py-2.5 rounded-xl border-2 border-gray-300 bg-red-50 text-[#550000] font-bold shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-            Health Dashboard
-          </button>
-          <button data-view-target="viewIngestion" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-300 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-            Data Ingestion &amp; Mapping
-          </button>
-          <button data-view-target="viewForecast" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-300 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-            <i data-lucide="trending-up" class="w-4 h-4"></i>
-            Demand Forecast &amp; Sliders
-          </button>
-          <button data-view-target="viewPurchaseOrders" class="nav-tab-btn px-4 py-2.5 rounded-xl border-2 border-gray-300 bg-white text-slate-900 font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-            <i data-lucide="package-check" class="w-4 h-4"></i>
-            Purchase Orders (POs)
-          </button>
+      <!-- Primary Navigation Tabs (Custom pill style matching design) -->
+      <div class="options-nav-bar p-2 sm:p-2.5 rounded-2xl no-print overflow-x-auto scroll-touch">
+        <nav class="flex items-center gap-2 sm:gap-3 text-xs whitespace-nowrap min-w-max">
+          <div class="nav-option-slot active-slot">
+            <button data-view-target="viewOverview" class="nav-option-btn active-tab cursor-pointer">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-white shrink-0"></i>
+              <span>Health Dashboard</span>
+            </button>
+          </div>
+          <div class="nav-option-slot">
+            <button data-view-target="viewIngestion" class="nav-option-btn cursor-pointer">
+              <i data-lucide="cloud-upload" class="w-4 h-4 text-white shrink-0"></i>
+              <span>Data Ingestion &amp; Mapping</span>
+            </button>
+          </div>
+          <div class="nav-option-slot">
+            <button data-view-target="viewForecast" class="nav-option-btn cursor-pointer">
+              <i data-lucide="trending-up" class="w-4 h-4 text-white shrink-0"></i>
+              <span>Demand Forecast &amp; Sliders</span>
+            </button>
+          </div>
+          <div class="nav-option-slot">
+            <button data-view-target="viewPurchaseOrders" class="nav-option-btn cursor-pointer">
+              <i data-lucide="package-check" class="w-4 h-4 text-white shrink-0"></i>
+              <span>Purchase Orders (POs)</span>
+              <i data-lucide="sparkle" class="w-3.5 h-3.5 text-rose-200/90 shrink-0 ml-0.5"></i>
+            </button>
+          </div>
         </nav>
       </div>
 

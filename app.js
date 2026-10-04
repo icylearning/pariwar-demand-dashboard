@@ -1146,17 +1146,15 @@ function switchMainView(targetId) {
   document.querySelectorAll('nav [data-view-target]').forEach(tab => {
     const isActive = tab.getAttribute('data-view-target') === targetId;
     tab.classList.toggle('active-tab', isActive);
-    tab.classList.toggle('border-gray-300', true);
-    tab.classList.toggle('bg-red-50', isActive);
-    tab.classList.toggle('text-[#550000]', isActive);
-    tab.classList.toggle('font-bold', isActive);
-    tab.classList.toggle('shadow-xs', isActive);
-
-    tab.classList.toggle('bg-white', !isActive);
-    tab.classList.toggle('text-slate-900', !isActive);
-    tab.classList.toggle('font-semibold', !isActive);
+    
+    // Toggle active slot wrapper if present
+    const slot = tab.closest('.nav-option-slot');
+    if (slot) {
+      slot.classList.toggle('active-slot', isActive);
+    }
   });
 
+  if (window.lucide) window.lucide.createIcons();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

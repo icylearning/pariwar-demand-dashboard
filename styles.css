@@ -250,28 +250,87 @@ input[type="range"]::-moz-range-track {
   --box-border-subtle: #e5e7eb;
 }
 
-/* Primary navigation tabs */
-.nav-tab-btn {
-  border: 1.5px solid var(--box-border) !important;
-  border-radius: 0.75rem !important;
-  transition: all 0.18s ease-in-out;
+/* Custom Options Navigation Bar (Matching Peach & Burgundy Pill Design) */
+.options-nav-bar {
+  background-color: #FCC1A7;
+  background: linear-gradient(180deg, #FDD3BE 0%, #FCC0A6 100%);
+  border: 1.5px solid #EAA896 !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 4px 14px -2px rgba(133, 18, 24, 0.08);
 }
-.nav-tab-btn:not(.active-tab) {
-  background-color: #ffffff !important;
-  color: #374151 !important;
+
+.nav-option-slot {
+  padding: 3px 4px;
+  border-radius: 1.15rem;
+  border: 1.5px solid transparent;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.nav-tab-btn:not(.active-tab):hover {
-  background-color: #f9fafb !important;
-  border-color: #9ca3af !important;
-  color: #111827 !important;
+
+.nav-option-slot.active-slot {
+  background: rgba(255, 255, 255, 0.38) !important;
+  border-color: #D99885 !important;
+  box-shadow: 0 1px 4px rgba(133, 18, 24, 0.07);
+}
+
+.nav-option-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #851218 !important;
+  color: #ffffff !important;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 8px 18px;
+  border-radius: 9999px !important;
+  border: 1px solid #720e13 !important;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 5px rgba(117, 15, 20, 0.25);
+}
+
+/* Concentric outer ring matching reference photo */
+.nav-option-btn::after {
+  content: '';
+  position: absolute;
+  inset: -4.5px;
+  border-radius: 9999px;
+  border: 1.5px solid #851218;
+  pointer-events: none;
+  transition: all 0.18s ease;
+}
+
+.nav-option-btn:hover {
+  background: #96161d !important;
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(117, 15, 20, 0.32);
 }
-.nav-tab-btn.active-tab {
-  border-color: #550000 !important;
-  background-color: #fef2f2 !important;
-  color: #550000 !important;
-  font-weight: 800 !important;
-  box-shadow: 0 1px 3px rgba(85, 0, 0, 0.1) !important;
+
+.nav-option-btn:hover::after {
+  border-color: #96161d;
+  inset: -5px;
+}
+
+.nav-option-btn:active {
+  transform: scale(0.98);
+  background: #750f14 !important;
+}
+
+.nav-option-btn.active-tab {
+  background: #851218 !important;
+  box-shadow: 0 2px 7px rgba(133, 18, 24, 0.35);
+}
+
+.nav-option-btn.active-tab::after {
+  border-color: #851218;
+  border-width: 1.5px;
 }
 
 /* Cards that already carry a border */
