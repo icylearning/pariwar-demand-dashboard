@@ -243,43 +243,49 @@ input[type="range"]::-moz-range-track {
 
 
 /* ==========================================================================
-   Border & Rounding System (dark grey borders, all boxes rounded)
+   Border & Rounding System (pleasing light grey borders, rounded boxes)
    ========================================================================== */
 :root {
-  --box-border: #4b5563; /* dark grey */
+  --box-border: #d1d5db; /* pleasing soft light gray */
+  --box-border-subtle: #e5e7eb;
 }
 
 /* Primary navigation tabs */
 .nav-tab-btn {
-  border: 2px solid var(--box-border) !important;
+  border: 1.5px solid var(--box-border) !important;
   border-radius: 0.75rem !important;
   transition: all 0.18s ease-in-out;
 }
 .nav-tab-btn:not(.active-tab) {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #374151 !important;
 }
 .nav-tab-btn:not(.active-tab):hover {
-  background-color: #f3f4f6 !important;
+  background-color: #f9fafb !important;
+  border-color: #9ca3af !important;
+  color: #111827 !important;
   transform: translateY(-1px);
 }
 .nav-tab-btn.active-tab {
+  border-color: #550000 !important;
   background-color: #fef2f2 !important;
   color: #550000 !important;
   font-weight: 800 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: 0 1px 3px rgba(85, 0, 0, 0.1) !important;
 }
 
 /* Cards that already carry a border */
 .border-slate-200\/80,
 .border-slate-200\/70,
 .border-slate-300,
-.border-gray-600 {
+.border-gray-600,
+.border-gray-300 {
   border-color: var(--box-border) !important;
 }
 .border-slate-200\/80,
-.border-slate-200\/70 {
-  border-width: 2px !important;
+.border-slate-200\/70,
+.border-gray-600 {
+  border-width: 1.5px !important;
 }
 
 /* Round every bordered box/card */
@@ -287,6 +293,7 @@ input[type="range"]::-moz-range-track {
 .border-2,
 [class*="border-slate-200"],
 .border-gray-600,
+.border-gray-300,
 .bg-white.shadow-2xs,
 .bg-white.shadow-sm,
 table {
@@ -305,7 +312,7 @@ table {
 #tabModeUpload,
 #tabModePaste,
 #uploadModeReplaceBtn {
-  border: 2px solid var(--box-border) !important;
+  border: 1.5px solid var(--box-border) !important;
   border-radius: 0.75rem !important;
 }
 #uploadModeMergeBtn { border-radius: 0.5rem !important; }
@@ -321,7 +328,7 @@ input[type="text"],
 input[type="number"],
 select,
 textarea {
-  border: 2px solid var(--box-border) !important;
+  border: 1.5px solid var(--box-border) !important;
   border-radius: 0.5rem !important;
 }
 input[type="text"]:focus,
@@ -329,6 +336,7 @@ input[type="number"]:focus,
 select:focus,
 textarea:focus {
   border-color: #550000 !important;
+  box-shadow: 0 0 0 2px rgba(85, 0, 0, 0.08) !important;
   outline: none !important;
 }
 

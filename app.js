@@ -1080,10 +1080,10 @@ function setupEventListeners() {
 
       filterPills.forEach(p => {
         p.classList.remove('bg-[#550000]', 'text-white', 'font-bold');
-        p.classList.add('text-slate-900', 'bg-white', 'border-gray-600', 'font-semibold');
+        p.classList.add('text-slate-900', 'bg-white', 'border-gray-300', 'font-semibold');
       });
       e.currentTarget.classList.remove('text-slate-900', 'bg-white');
-      e.currentTarget.classList.add('bg-[#550000]', 'text-white', 'border-gray-600', 'font-bold');
+      e.currentTarget.classList.add('bg-[#550000]', 'text-white', 'border-gray-300', 'font-bold');
 
       const health = computeAggregateHealth();
       renderForecastTable(health.enriched);
@@ -1133,7 +1133,7 @@ function switchMainView(targetId) {
   document.querySelectorAll('nav [data-view-target]').forEach(tab => {
     const isActive = tab.getAttribute('data-view-target') === targetId;
     tab.classList.toggle('active-tab', isActive);
-    tab.classList.toggle('border-gray-600', true);
+    tab.classList.toggle('border-gray-300', true);
     tab.classList.toggle('bg-red-50', isActive);
     tab.classList.toggle('text-[#550000]', isActive);
     tab.classList.toggle('font-bold', isActive);
