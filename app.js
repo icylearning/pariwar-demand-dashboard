@@ -995,11 +995,8 @@ window.setForecastHorizon = function(days) {
   ['preset7d', 'preset14d', 'preset30d'].forEach(id => {
     const btn = document.getElementById(id);
     if (!btn) return;
-    if ((id === 'preset7d' && days === 7) || (id === 'preset14d' && days === 14) || (id === 'preset30d' && days === 30)) {
-      btn.className = 'px-2.5 py-1 text-xs font-bold rounded-md bg-indigo-600 text-white shadow-2xs transition-all';
-    } else {
-      btn.className = 'px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
-    }
+    const isSelected = (id === 'preset7d' && days === 7) || (id === 'preset14d' && days === 14) || (id === 'preset30d' && days === 30);
+    btn.className = `burgundy-pill burgundy-pill-sm cursor-pointer ${isSelected ? 'active-tab opacity-100' : 'opacity-75'}`;
   });
 
   renderAllViews();
@@ -1092,11 +1089,11 @@ function setupEventListeners() {
       StockPulse.activeFilterBucket = bucket;
 
       filterPills.forEach(p => {
-        p.classList.remove('bg-[#550000]', 'text-white', 'font-bold');
-        p.classList.add('text-slate-900', 'bg-white', 'border-gray-300', 'font-semibold');
+        p.classList.remove('active-tab', 'opacity-100');
+        p.classList.add('opacity-80');
       });
-      e.currentTarget.classList.remove('text-slate-900', 'bg-white');
-      e.currentTarget.classList.add('bg-[#550000]', 'text-white', 'border-gray-300', 'font-bold');
+      e.currentTarget.classList.add('active-tab', 'opacity-100');
+      e.currentTarget.classList.remove('opacity-80');
 
       const health = computeAggregateHealth();
       renderForecastTable(health.enriched);
@@ -1265,11 +1262,11 @@ window.setUploadMode = function setUploadMode(mode) {
   const mergeBtn   = document.getElementById('uploadModeMergeBtn');
   if (replaceBtn && mergeBtn) {
     if (uploadMode === 'replace') {
-      replaceBtn.className = 'px-3 py-1 rounded-lg font-bold border-2 border-[#550000] bg-white text-[#550000] shadow-2xs transition-all cursor-pointer';
-      mergeBtn.className   = 'px-3 py-1 rounded-lg font-medium border-2 border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all cursor-pointer';
+      replaceBtn.className = 'burgundy-pill burgundy-pill-sm active-tab cursor-pointer';
+      mergeBtn.className   = 'burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer';
     } else {
-      replaceBtn.className = 'px-3 py-1 rounded-lg font-medium border-2 border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-all cursor-pointer';
-      mergeBtn.className   = 'px-3 py-1 rounded-lg font-bold border-2 border-[#550000] bg-white text-[#550000] shadow-2xs transition-all cursor-pointer';
+      replaceBtn.className = 'burgundy-pill burgundy-pill-sm opacity-75 cursor-pointer';
+      mergeBtn.className   = 'burgundy-pill burgundy-pill-sm active-tab cursor-pointer';
     }
   }
 };
@@ -1993,20 +1990,20 @@ window.toggleIngestMode = function(mode) {
     uploadArea?.classList.remove('hidden');
     pasteArea?.classList.add('hidden');
     
-    tabUpload?.classList.add('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
-    tabUpload?.classList.remove('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+    tabUpload?.classList.add('active-tab', 'opacity-100');
+    tabUpload?.classList.remove('opacity-75');
 
-    tabPaste?.classList.remove('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
-    tabPaste?.classList.add('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+    tabPaste?.classList.remove('active-tab', 'opacity-100');
+    tabPaste?.classList.add('opacity-75');
   } else {
     uploadArea?.classList.add('hidden');
     pasteArea?.classList.remove('hidden');
 
-    tabPaste?.classList.add('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
-    tabPaste?.classList.remove('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+    tabPaste?.classList.add('active-tab', 'opacity-100');
+    tabPaste?.classList.remove('opacity-75');
 
-    tabUpload?.classList.remove('border-[#550000]', 'bg-red-50', 'text-[#550000]', 'font-bold', 'shadow-2xs');
-    tabUpload?.classList.add('border-slate-300', 'bg-white', 'text-slate-600', 'font-semibold');
+    tabUpload?.classList.remove('active-tab', 'opacity-100');
+    tabUpload?.classList.add('opacity-75');
   }
 };
 

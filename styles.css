@@ -250,13 +250,13 @@ input[type="range"]::-moz-range-track {
   --box-border-subtle: #e5e7eb;
 }
 
-/* Custom Options Navigation Bar (Matching Peach & Burgundy Pill Design) */
+/* Navigation Options Bar - Pure White Container with Light Gray Border */
 .options-nav-bar {
-  background-color: #FCC1A7;
-  background: linear-gradient(180deg, #FDD3BE 0%, #FCC0A6 100%);
-  border: 1.5px solid #EAA896 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1.5px solid var(--box-border, #d1d5db) !important;
   border-radius: 1.25rem !important;
-  box-shadow: 0 4px 14px -2px rgba(133, 18, 24, 0.08);
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
 }
 
 .nav-option-slot {
@@ -270,17 +270,22 @@ input[type="range"]::-moz-range-track {
 }
 
 .nav-option-slot.active-slot {
-  background: rgba(255, 255, 255, 0.38) !important;
-  border-color: #D99885 !important;
-  box-shadow: 0 1px 4px rgba(133, 18, 24, 0.07);
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
 }
 
+/* ==========================================================================
+   Universal Burgundy Pill Button System (with Concentric Outer Ring)
+   ========================================================================== */
+.burgundy-pill,
 .nav-option-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.55rem;
-  background: #851218 !important;
+  background-color: #851218 !important;
   color: #ffffff !important;
   font-family: inherit;
   font-size: 13px;
@@ -294,9 +299,11 @@ input[type="range"]::-moz-range-track {
   user-select: none;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 2px 5px rgba(117, 15, 20, 0.25);
+  text-decoration: none;
 }
 
-/* Concentric outer ring matching reference photo */
+/* Concentric outer pill border matching reference design */
+.burgundy-pill::after,
 .nav-option-btn::after {
   content: '';
   position: absolute;
@@ -307,30 +314,45 @@ input[type="range"]::-moz-range-track {
   transition: all 0.18s ease;
 }
 
+.burgundy-pill:hover,
 .nav-option-btn:hover {
-  background: #96161d !important;
+  background-color: #96161d !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(117, 15, 20, 0.32);
 }
 
+.burgundy-pill:hover::after,
 .nav-option-btn:hover::after {
   border-color: #96161d;
   inset: -5px;
 }
 
+.burgundy-pill:active,
 .nav-option-btn:active {
   transform: scale(0.98);
-  background: #750f14 !important;
+  background-color: #750f14 !important;
 }
 
+.burgundy-pill.active-tab,
 .nav-option-btn.active-tab {
-  background: #851218 !important;
-  box-shadow: 0 2px 7px rgba(133, 18, 24, 0.35);
+  background-color: #851218 !important;
+  box-shadow: 0 2px 8px rgba(133, 18, 24, 0.38);
 }
 
+.burgundy-pill.active-tab::after,
 .nav-option-btn.active-tab::after {
   border-color: #851218;
   border-width: 1.5px;
+}
+
+/* Small variant of burgundy pill */
+.burgundy-pill-sm {
+  padding: 5px 14px !important;
+  font-size: 11px !important;
+  gap: 0.4rem !important;
+}
+.burgundy-pill-sm::after {
+  inset: -3.5px !important;
 }
 
 /* Cards that already carry a border */
