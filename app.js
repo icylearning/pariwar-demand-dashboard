@@ -2577,7 +2577,7 @@ window.openPOModalForSupplier = function() {
   return window.openPOModal();
 };
 
-window.sendPOViaWhatsApp = function() {
+window.sendPOViaWhatsApp = function(targetSupplier) {
   const health = computeAggregateHealth();
   if (!health.enriched || health.enriched.length === 0) {
     showToast('No inventory data loaded. Please upload sales data first.', 'info');
@@ -2585,42 +2585,68 @@ window.sendPOViaWhatsApp = function() {
   }
 
   // Unified items needing restock across the entire store (no categorization)
-  const activeItems = health.enriched.filter(item => {
+  let activeItems = health.enriched.filter(item => {
     if (StockPulse.customPOQty && StockPulse.customPOQty[item.sku] === 0) return false;
     return item.recommendedPOQty > 0 || StockPulse.selectedSkusForPO.has(item.sku);
   });
+
+  if (targetSupplier && typeof targetSupplier === 'string') {
+    activeItems = activeItems.filter(item => item.supplier === targetSupplier);
+  }
+
   const orderList = activeItems.length > 0 
     ? activeItems 
     : health.enriched.filter(i => (StockPulse.customPOQty && StockPulse.customPOQty[i.sku] === 0 ? false : true)).slice(0, 20);
 
   const poDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  const leadDays = StockPulse.profile.defaultLeadTimeDays || 4;
-  const deliveryDate = new Date(Date.now() + leadDays * 86400000).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   let totalUnits = 0;
-  const itemsText = orderList.map((item, idx) => {
+  const maxLen = 25;
+  const divider = '------------------------------------';
+  const tableLines = [
+    divider,
+    'No.  Item Description          Qty  ',
+    divider
+  ];
+
+  orderList.forEach((item, idx) => {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
     totalUnits += qty;
-    return `${idx + 1}. *${item.name}* (${item.sku})
-   Quantity: ${qty} units`;
-  }).join('\n');
+
+    const no = String(idx + 1).padStart(2, ' ');
+    const q = String(qty).padStart(4, ' ');
+    const name = (item.name || '').trim();
+
+    if (name.length <= maxLen) {
+      tableLines.push(`${no}   ${name.padEnd(maxLen, ' ')} ${q}`);
+    } else {
+      let splitIdx = name.lastIndexOf(' ', maxLen);
+      if (splitIdx === -1 || splitIdx < 10) splitIdx = maxLen;
+      const part1 = name.substring(0, splitIdx).trim();
+      let part2 = name.substring(splitIdx).trim();
+      if (part2.length > maxLen) {
+        part2 = part2.substring(0, maxLen - 2) + '..';
+      }
+      tableLines.push(`${no}   ${part1.padEnd(maxLen, ' ')} ${q}`);
+      tableLines.push(`     ${part2.padEnd(maxLen, ' ')}     `);
+    }
+  });
+  tableLines.push(divider);
+
+  const supplierHeader = targetSupplier ? `\n*Supplier:* ${targetSupplier}` : '';
 
   const msg = 
 `*PURCHASE ORDER: ${poNumber}*
-*Store:* ${StockPulse.profile.storeName}
-*Date:* ${poDate}
-*Expected Delivery:* ${deliveryDate} (${leadDays} days lead time)
+*Store:* PARIWAR SUPERMARKET
+*Date:* ${poDate}${supplierHeader}
 
-*Items Ordered:*
-${itemsText}
+\`\`\`
+${tableLines.join('\n')}
+\`\`\`
 
-----------------------------------------
 *Total SKUs:* ${orderList.length}
-*Total Units:* ${totalUnits} units
-
-_Generated via StockPulse AI Retail Engine_
-Please confirm order receipt and shipping schedule. Thank you!`;
+*Total Units:* ${totalUnits} units`;
 
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
 
