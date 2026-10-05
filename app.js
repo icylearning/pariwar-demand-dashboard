@@ -2481,6 +2481,78 @@ window.downloadPOExcel = async function() {
 
 
 // ============================================================================
+// Direct Purchase Order PDF Export
+// ============================================================================
+
+window.downloadPOPDF = async function() {
+  const printArea = document.getElementById('poPrintArea');
+  if (!printArea) {
+    showToast('Purchase Order preview is not ready.', 'info');
+    return;
+  }
+
+  const poNumberEl = document.getElementById('poModalNumber');
+  const poNumber = poNumberEl ? poNumberEl.textContent.trim() : 'PO';
+  const filename = `${poNumber}_Pariwar_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  if (typeof html2pdf !== 'undefined') {
+    showToast('Preparing PDF download...', 'info');
+
+    // Create an unclipped offscreen container formatted specifically for clean A4 printing
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '750px';
+    container.style.background = '#ffffff';
+    container.style.color = '#0f172a';
+    container.style.padding = '24px';
+    container.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+    const clone = printArea.cloneNode(true);
+    clone.style.overflow = 'visible';
+    clone.style.maxHeight = 'none';
+    clone.style.height = 'auto';
+    clone.style.width = '100%';
+    const innerTables = clone.querySelectorAll('.overflow-x-auto, table');
+    innerTables.forEach(t => {
+      t.style.overflow = 'visible';
+      t.style.width = '100%';
+    });
+
+    container.appendChild(clone);
+    document.body.appendChild(container);
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      await html2pdf().set(opt).from(container).save();
+      showToast(`Purchase Order downloaded: ${filename}`, 'success');
+    } catch (err) {
+      console.warn('html2pdf generation error, using window.print() fallback:', err);
+      window.print();
+    } finally {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    }
+    return;
+  }
+
+  // Fallback to native window.print() if html2pdf is not loaded
+  window.print();
+};
+
+
+
+
+// ============================================================================
 // Purchase Order Generation & Export (Step 6)
 // ============================================================================
 
@@ -2558,10 +2630,16 @@ window.openPOModal = function() {
     waBtn.onclick = () => window.sendPOViaWhatsApp();
   }
 
-  // Setup Print button
+  // Setup Download PDF button
   const printBtn = document.getElementById('poPrintBtn');
   if (printBtn) {
-    printBtn.onclick = () => window.print();
+    printBtn.onclick = () => window.downloadPOPDF();
+  }
+
+  // Setup Direct Print button
+  const printDirectBtn = document.getElementById('poPrintDirectBtn');
+  if (printDirectBtn) {
+    printDirectBtn.onclick = () => window.print();
   }
 
   modal.classList.remove('hidden');

@@ -82,6 +82,15 @@
     }
   </script>
 
+  <!-- html2pdf for direct Purchase Order PDF download -->
+  <script src="html2pdf.bundle.min.js"></script>
+  <script>
+    if (typeof html2pdf === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      document.head.appendChild(script);
+    }
+  </script>
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
@@ -970,9 +979,13 @@
             <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
             <span>Download Excel (.xlsx)</span>
           </button>
-          <button id="poPrintBtn" class="burgundy-pill opacity-90 text-xs py-1.5 px-4 cursor-pointer">
+          <button id="poPrintBtn" onclick="downloadPOPDF()" class="burgundy-pill opacity-90 text-xs py-1.5 px-4 cursor-pointer" title="Directly download clean Purchase Order PDF">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Download PDF</span>
+          </button>
+          <button id="poPrintDirectBtn" onclick="window.print()" class="burgundy-pill opacity-80 text-xs py-1.5 px-3 cursor-pointer" title="Print document">
             <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-            <span>Print / Save PDF</span>
+            <span>Print</span>
           </button>
           <button id="poWhatsAppBtn" onclick="sendPOViaWhatsApp()" class="burgundy-pill text-xs py-1.5 px-4 cursor-pointer">
             <i data-lucide="send" class="w-3.5 h-3.5"></i>

@@ -228,24 +228,101 @@ input[type="range"]::-moz-range-track {
 
 /* Print Styles for Purchase Orders */
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    margin: 10mm 12mm;
+    size: auto;
   }
-  #poPrintArea, #poPrintArea * {
-    visibility: visible;
+
+  html, body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  #poPrintArea {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
-    background: white;
-    color: black;
-  }
-  .no-print {
+
+  /* Hide non-print interface elements */
+  header, nav, footer, #toastContainer, .no-print,
+  #columnMappingModal, #engineProcessingModal,
+  body > div.min-h-full {
     display: none !important;
+  }
+
+  /* Reset modal to standard in-flow document page */
+  #poPreviewModal {
+    position: static !important;
+    display: block !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    visibility: visible !important;
+    z-index: auto !important;
+  }
+
+  #poPreviewModal > div {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    visibility: visible !important;
+  }
+
+  /* Purchase order print area */
+  #poPrintArea {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 10px 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    visibility: visible !important;
+  }
+
+  #poPrintArea * {
+    visibility: visible !important;
+  }
+
+  #poPrintArea table {
+    width: 100% !important;
+    min-width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  #poPrintArea tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  #poPrintArea th,
+  #poPrintArea td {
+    color: #0f172a !important;
+    background: transparent !important;
   }
 }
 
