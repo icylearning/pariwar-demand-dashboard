@@ -2602,37 +2602,12 @@ window.sendPOViaWhatsApp = function(targetSupplier) {
   const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   let totalUnits = 0;
-  const maxLen = 22;
-  const divider = '--------------------------------------';
-  const tableLines = [
-    divider,
-    'Sr.No  Item Description    Qty Ordered',
-    divider
-  ];
-
-  orderList.forEach((item, idx) => {
+  const itemsText = orderList.map((item, idx) => {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
     totalUnits += qty;
-
-    const no = String(idx + 1).padStart(3, ' ');
-    const q = String(qty).padStart(6, ' ');
-    const name = (item.name || '').trim();
-
-    if (name.length <= maxLen) {
-      tableLines.push(`${no}    ${name.padEnd(maxLen, ' ')}   ${q}`);
-    } else {
-      let splitIdx = name.lastIndexOf(' ', maxLen);
-      if (splitIdx === -1 || splitIdx < 10) splitIdx = maxLen;
-      const part1 = name.substring(0, splitIdx).trim();
-      let part2 = name.substring(splitIdx).trim();
-      if (part2.length > maxLen) {
-        part2 = part2.substring(0, maxLen - 2) + '..';
-      }
-      tableLines.push(`${no}    ${part1.padEnd(maxLen, ' ')}   ${q}`);
-      tableLines.push(`       ${part2.padEnd(maxLen, ' ')}         `);
-    }
-  });
-  tableLines.push(divider);
+    return `${idx + 1}. *${item.name}* (${item.sku})
+   Quantity: ${qty} units`;
+  }).join('\n');
 
   const supplierHeader = targetSupplier ? `\n*Supplier:* ${targetSupplier}` : '';
 
@@ -2641,10 +2616,10 @@ window.sendPOViaWhatsApp = function(targetSupplier) {
 *Store:* PARIWAR SUPERMARKET
 *Date:* ${poDate}${supplierHeader}
 
-\`\`\`
-${tableLines.join('\n')}
-\`\`\`
+*Items Ordered:*
+${itemsText}
 
+----------------------------------------
 *Total SKUs:* ${orderList.length}
 *Total Units:* ${totalUnits} units
 
