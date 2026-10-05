@@ -2590,9 +2590,12 @@ window.openPOModal = function() {
     return { ...item, resolvedQty: qty };
   });
 
+  const totalSKUs = itemsToOrder.length;
+  let totalUnits = 0;
   let subtotal = 0;
   const rowsHtml = itemsToOrder.map((item, idx) => {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
+    totalUnits += qty;
     const lineTotal = +(qty * item.costPrice).toFixed(2);
     subtotal += lineTotal;
 
@@ -2619,6 +2622,12 @@ window.openPOModal = function() {
   const elSub = document.getElementById('poSubtotal'); if (elSub) elSub.textContent = `${StockPulse.profile.currency}${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const elTax = document.getElementById('poTax'); if (elTax) elTax.textContent = `${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const elTotal = document.getElementById('poTotal'); if (elTotal) elTotal.textContent = `${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  // Set Total SKUs & Total Units in PDF / Modal
+  const elSKUs = document.getElementById('poModalTotalSKUs'); if (elSKUs) elSKUs.textContent = totalSKUs;
+  const elUnits = document.getElementById('poModalTotalUnits'); if (elUnits) elUnits.textContent = totalUnits.toLocaleString('en-IN');
+  const elSummSKUs = document.getElementById('poSummaryTotalSKUs'); if (elSummSKUs) elSummSKUs.textContent = totalSKUs;
+  const elSummUnits = document.getElementById('poSummaryTotalUnits'); if (elSummUnits) elSummUnits.textContent = totalUnits.toLocaleString('en-IN');
 
   // Setup WhatsApp share button in modal
   const waBtn = document.getElementById('poWhatsAppBtn');

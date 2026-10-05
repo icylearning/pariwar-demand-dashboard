@@ -960,7 +960,29 @@
             <tbody id="poTableRows">
               <!-- Dynamically populated -->
             </tbody>
+            <tfoot class="border-t-2 border-slate-200 text-xs font-bold text-slate-800 bg-slate-50/50">
+              <tr>
+                <td colspan="2" class="py-2.5">
+                  <span class="text-slate-500 font-normal">Total SKUs:</span>
+                  <span id="poModalTotalSKUs" class="font-mono ml-1 font-bold text-slate-900">0</span>
+                </td>
+                <td class="py-2.5 text-center font-mono font-bold text-slate-900" id="poModalTotalUnits">0</td>
+                <td class="py-2.5 text-center text-slate-400 font-mono font-normal">&mdash;</td>
+              </tr>
+            </tfoot>
           </table>
+        </div>
+
+        <!-- Summary Bar: Total SKUs & Total Units -->
+        <div class="mt-4 pt-3 border-t border-slate-200 flex flex-row items-center justify-between text-xs font-medium text-slate-700 bg-slate-50 p-3 rounded-lg">
+          <div>
+            <span class="text-slate-500">Total SKUs:</span>
+            <span id="poSummaryTotalSKUs" class="font-mono font-bold text-slate-900 ml-1.5 text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-slate-500">Total Units:</span>
+            <span id="poSummaryTotalUnits" class="font-mono font-bold text-[#550000] ml-1.5 text-sm">0</span>
+          </div>
         </div>
       </div>
 

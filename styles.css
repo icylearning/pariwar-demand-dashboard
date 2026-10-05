@@ -374,6 +374,86 @@ input[type="range"]::-moz-range-track {
     width: 100% !important;
     font-size: 13px !important;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+    animation: mobileToastEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* ==========================================================================
+     Minimal Mobile Animations Suite (Ultra-lightweight GPU-accelerated)
+     ========================================================================== */
+
+  /* Tactile touch feedback on buttons, filter pills, and cards */
+  .burgundy-pill,
+  button:not(:disabled),
+  .demand-forecast-card,
+  .metric-card-mobile {
+    transition: transform 0.14s cubic-bezier(0.2, 0, 0, 1), opacity 0.14s ease, background-color 0.14s ease, box-shadow 0.14s ease !important;
+  }
+
+  .burgundy-pill:active,
+  button:not(:disabled):active {
+    transform: scale(0.97) !important;
+  }
+
+  .demand-forecast-card:active {
+    transform: scale(0.99) !important;
+  }
+
+  /* Smooth, subtle fade & micro-slide on section tab switch */
+  section.tab-content:not(.hidden) {
+    animation: mobileSectionFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes mobileSectionFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth bottom-sheet / modal entrance on mobile */
+  .modal-backdrop:not(.hidden) {
+    animation: mobileBackdropFade 0.18s ease-out forwards;
+  }
+
+  .modal-backdrop:not(.hidden) > div {
+    animation: mobileSheetSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes mobileBackdropFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes mobileSheetSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.99);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mobileToastEnter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth scroll container behavior */
+  .mobile-pill-scroll,
+  .scroll-touch {
+    scroll-behavior: smooth;
   }
 }
 
