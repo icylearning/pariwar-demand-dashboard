@@ -2531,14 +2531,9 @@ window.openPOModal = function() {
     return `
       <tr class="border-b border-slate-100 text-xs">
         <td class="py-2.5 font-mono text-slate-500">${idx + 1}</td>
-        <td class="py-2.5">
-          <div class="font-semibold text-slate-900">${item.name}</div>
-          <div class="text-[11px] text-slate-400 font-mono">SKU: ${item.sku}</div>
-        </td>
+        <td class="py-2.5 font-semibold text-slate-900">${item.name}</td>
         <td class="py-2.5 text-center font-mono font-bold text-slate-800">${qty}</td>
         <td class="py-2.5 text-center font-mono text-slate-600">${item.currentStock ?? 0}</td>
-        <td class="py-2.5 text-right font-mono text-slate-600">${StockPulse.profile.currency}${item.costPrice.toFixed(2)}</td>
-        <td class="py-2.5 text-right font-mono font-bold text-slate-900">${StockPulse.profile.currency}${lineTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       </tr>
     `;
   }).join('');
@@ -2546,16 +2541,16 @@ window.openPOModal = function() {
   const tax = +(subtotal * 0.05).toFixed(2);
   const total = +(subtotal + tax).toFixed(2);
 
-  // Set Modal Values
-  document.getElementById('poModalNumber').textContent = poNumber;
-  document.getElementById('poModalDate').textContent = poDate;
-  document.getElementById('poModalDelivery').textContent = `${expDelivery} (${leadDays} days)`;
-  document.getElementById('poModalVendorName').textContent = vendorName;
-  document.getElementById('poModalVendorPhone').textContent = vendorPhone;
-  document.getElementById('poTableRows').innerHTML = rowsHtml;
-  document.getElementById('poSubtotal').textContent = `${StockPulse.profile.currency}${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('poTax').textContent = `${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('poTotal').textContent = `${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // Set Modal Values safely
+  const elNum = document.getElementById('poModalNumber'); if (elNum) elNum.textContent = poNumber;
+  const elDate = document.getElementById('poModalDate'); if (elDate) elDate.textContent = poDate;
+  const elDeliv = document.getElementById('poModalDelivery'); if (elDeliv) elDeliv.textContent = `${expDelivery} (${leadDays} days)`;
+  const elVenName = document.getElementById('poModalVendorName'); if (elVenName) elVenName.textContent = vendorName;
+  const elVenPhone = document.getElementById('poModalVendorPhone'); if (elVenPhone) elVenPhone.textContent = vendorPhone;
+  const elRows = document.getElementById('poTableRows'); if (elRows) elRows.innerHTML = rowsHtml;
+  const elSub = document.getElementById('poSubtotal'); if (elSub) elSub.textContent = `${StockPulse.profile.currency}${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const elTax = document.getElementById('poTax'); if (elTax) elTax.textContent = `${StockPulse.profile.currency}${tax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const elTotal = document.getElementById('poTotal'); if (elTotal) elTotal.textContent = `${StockPulse.profile.currency}${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   // Setup WhatsApp share button in modal
   const waBtn = document.getElementById('poWhatsAppBtn');
