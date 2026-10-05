@@ -818,23 +818,23 @@ function renderVendorPOGroups(enrichedItems) {
       totalCost += lineCost;
 
       return `
-        <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-0">
-          <td class="px-4 py-3 text-center font-mono text-slate-400">${idx + 1}</td>
-          <td class="px-4 py-3 whitespace-nowrap">
+        <tr class="po-item-row hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-0">
+          <td class="td-po-index px-4 py-3 text-center font-mono text-slate-400">${idx + 1}</td>
+          <td class="td-po-info px-4 py-3 whitespace-nowrap">
             <div class="text-xs font-semibold text-slate-900">${item.name}</div>
             <div class="text-[11px] text-slate-400 font-mono">${item.sku}</div>
           </td>
-          <td class="px-4 py-3 text-center font-mono text-slate-700 font-medium">${item.currentStock ?? 0}</td>
-          <td class="px-4 py-3 text-center font-mono text-slate-500">${item.reorderPoint} (SS: ${item.safetyStock})</td>
-          <td class="px-4 py-3 text-right font-mono text-slate-700">${StockPulse.profile.currency}${item.costPrice.toFixed(2)}</td>
-          <td class="px-4 py-3 text-center">
+          <td class="td-po-stock px-4 py-3 text-center font-mono text-slate-700 font-medium">${item.currentStock ?? 0}</td>
+          <td class="td-po-reorder px-4 py-3 text-center font-mono text-slate-500">${item.reorderPoint} (SS: ${item.safetyStock})</td>
+          <td class="td-po-cost px-4 py-3 text-right font-mono text-slate-700">${StockPulse.profile.currency}${item.costPrice.toFixed(2)}</td>
+          <td class="td-po-stepper px-4 py-3 text-center">
             <div class="inline-flex items-center border border-slate-200 rounded-lg bg-white shadow-2xs overflow-hidden">
               <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
               <input type="number" id="poQtyInput_po_${item.sku}" min="0" step="1" value="${qty}" oninput="updateCustomPOQty('${item.sku}', this.value)" class="qty-stepper-input w-14 h-7 text-center font-mono font-bold text-xs text-slate-900 border-x border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#550000] p-0" title="Click to edit order quantity directly">
               <button type="button" onclick="adjustPOQty('${item.sku}', 1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Increase order qty">+</button>
             </div>
           </td>
-          <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 pr-6">
+          <td class="td-po-linecost px-4 py-3 text-right font-mono font-bold text-slate-900 pr-6">
             ${StockPulse.profile.currency}${lineCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </td>
         </tr>
