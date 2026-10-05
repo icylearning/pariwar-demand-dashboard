@@ -2498,49 +2498,45 @@ window.downloadPOPDF = async function() {
   if (typeof html2pdf !== 'undefined') {
     showToast('Preparing PDF download...', 'info');
 
-    // Create an unclipped offscreen container formatted specifically for clean A4 printing
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '750px';
-    container.style.background = '#ffffff';
-    container.style.color = '#0f172a';
-    container.style.padding = '24px';
-    container.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    // Temporarily unclip modal scroll so html2canvas renders all rows without clipping
+    const modalWrapper = printArea.closest('.max-h-\\[90vh\\]') || printArea.parentElement;
+    const origModalMaxH = modalWrapper ? modalWrapper.style.maxHeight : '';
+    const origPrintOverflow = printArea.style.overflow;
+    const origPrintMaxH = printArea.style.maxHeight;
 
-    const clone = printArea.cloneNode(true);
-    clone.style.overflow = 'visible';
-    clone.style.maxHeight = 'none';
-    clone.style.height = 'auto';
-    clone.style.width = '100%';
-    const innerTables = clone.querySelectorAll('.overflow-x-auto, table');
-    innerTables.forEach(t => {
-      t.style.overflow = 'visible';
-      t.style.width = '100%';
+    if (modalWrapper) modalWrapper.style.maxHeight = 'none';
+    printArea.style.overflow = 'visible';
+    printArea.style.maxHeight = 'none';
+
+    const scrollContainers = printArea.querySelectorAll('.overflow-x-auto, .overflow-y-auto');
+    const origScrollStyles = [];
+    scrollContainers.forEach((el, i) => {
+      origScrollStyles[i] = el.style.overflow;
+      el.style.overflow = 'visible';
     });
-
-    container.appendChild(clone);
-    document.body.appendChild(container);
 
     const opt = {
       margin:       [10, 10, 10, 10],
       filename:     filename,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, backgroundColor: '#ffffff' },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     try {
-      await html2pdf().set(opt).from(container).save();
+      await html2pdf().set(opt).from(printArea).save();
       showToast(`Purchase Order downloaded: ${filename}`, 'success');
     } catch (err) {
       console.warn('html2pdf generation error, using window.print() fallback:', err);
       window.print();
     } finally {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
+      // Restore on-screen layout
+      if (modalWrapper) modalWrapper.style.maxHeight = origModalMaxH;
+      printArea.style.overflow = origPrintOverflow;
+      printArea.style.maxHeight = origPrintMaxH;
+      scrollContainers.forEach((el, i) => {
+        el.style.overflow = origScrollStyles[i];
+      });
     }
     return;
   }
