@@ -375,6 +375,123 @@ input[type="range"]::-moz-range-track {
     text-overflow: ellipsis !important;
   }
 
+  /* ========================================================================
+     Demand Forecast Mobile Card View (Zero Impact on PC Desktop Table)
+     ======================================================================== */
+  #forecastTable {
+    min-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+  }
+  #forecastTable thead {
+    display: none !important;
+  }
+  #forecastTableBody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .forecast-sku-row {
+    display: grid !important;
+    grid-template-columns: 28px 1fr !important;
+    gap: 10px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--box-border) !important;
+    border-radius: 1rem !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05) !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    white-space: normal !important;
+  }
+
+  /* 1. PO Checkbox on mobile: top-left */
+  .forecast-sku-row .td-po-select {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    padding: 2px 0 0 0 !important;
+    align-self: start !important;
+    white-space: normal !important;
+    border: none !important;
+  }
+
+  /* 2. Product Information: top-right */
+  .forecast-sku-row .td-product-info {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    border: none !important;
+  }
+
+  /* 3 & 4. Stock and Velocity stats row */
+  .forecast-sku-row .td-stock {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    padding: 8px 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    border-bottom: 1px dashed #e2e8f0 !important;
+    white-space: normal !important;
+  }
+  .forecast-sku-row .td-velocity {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    display: block !important;
+    padding: 8px 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+    border-radius: 0 0 0.75rem 0.75rem !important;
+    white-space: normal !important;
+  }
+
+  /* 5. Stockout status banner */
+  .forecast-sku-row .td-timeline {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 10px !important;
+    background: #fff5f5 !important;
+    border: 1px solid #fed7d7 !important;
+    border-radius: 0.625rem !important;
+    white-space: normal !important;
+  }
+
+  /* 6 & 7. Order Quantity Stepper & PO Draft button: side-by-side at bottom */
+  .forecast-sku-row .td-qty {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    padding: 8px 0 0 0 !important;
+    border-top: 1px dashed #e2e8f0 !important;
+    white-space: normal !important;
+    gap: 8px !important;
+  }
+  .forecast-sku-row .td-action {
+    grid-column: 1 / -1 !important;
+    grid-row: 6 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    border: none !important;
+    text-align: center !important;
+  }
+  .forecast-sku-row .td-action button {
+    width: 100% !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    justify-content: center !important;
+  }
+
   /* Compact navigation bar on mobile - 2x2 Grid View where all options are visible at once */
   .options-nav-bar {
     border-radius: 1rem !important;

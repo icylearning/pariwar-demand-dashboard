@@ -628,13 +628,13 @@ function renderForecastTable(enrichedItems) {
     const isSelected = StockPulse.selectedSkusForPO.has(item.sku);
 
     return `
-      <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-0">
-        <td class="px-4 py-3.5 whitespace-nowrap">
+      <tr class="forecast-sku-row hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-0">
+        <td class="td-po-select px-4 py-3.5 whitespace-nowrap">
           <input type="checkbox" id="poCheckbox_${item.sku}" data-sku-checkbox="${item.sku}" onchange="toggleSkuPOSelection('${item.sku}')" ${isSelected ? 'checked' : ''} class="rounded border-slate-300 text-[#550000] focus:ring-[#550000] cursor-pointer">
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap">
+        <td class="td-product-info px-4 py-3.5 whitespace-nowrap">
           <div class="flex items-center gap-2">
-            <div>
+            <div class="min-w-0 flex-1">
               <div class="text-xs font-semibold text-slate-900">${item.name}</div>
               <div class="text-[11px] text-slate-400 font-mono">${item.sku} &bull; ${item.supplier}</div>
               <!-- Website Unit Cost and Clickable Category Badge (Requirements 2 & 3) -->
@@ -648,23 +648,28 @@ function renderForecastTable(enrichedItems) {
                 </span>
               </div>
             </div>
-            ${bucketBadge}
+            <div class="shrink-0">
+              ${bucketBadge}
+            </div>
           </div>
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap font-mono text-xs">
-          <span class="font-bold text-slate-800">${item.currentStock}</span>
+        <td class="td-stock px-4 py-3.5 whitespace-nowrap font-mono text-xs">
+          <span class="sm:hidden text-[10px] text-slate-400 font-sans font-semibold uppercase block mb-0.5">Current Stock</span>
+          <span class="font-bold text-slate-800">${item.currentStock} units</span>
           <span class="text-[11px] text-slate-400 block">ROP: ${item.reorderPoint} (SS: ${item.safetyStock})</span>
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap">
+        <td class="td-velocity px-4 py-3.5 whitespace-nowrap">
+          <span class="sm:hidden text-[10px] text-slate-400 font-sans font-semibold uppercase block mb-0.5">Demand Pace</span>
           <div class="text-xs font-mono font-semibold text-[#550000]">${item.effectiveVelocity} units/day</div>
           <div class="text-[11px] text-slate-500 font-mono">Proj: ${item.projectedDemand} in ${StockPulse.forecastHorizonDays}d</div>
           <span class="inline-flex items-center text-[9px] px-1.5 py-0.5 rounded font-semibold bg-slate-100 text-slate-700 border border-slate-300 mt-1 cursor-help" title="Pattern: ${item.demandPattern.toUpperCase()} (ADI=${item.adi}, CV²=${item.cv2})">${item.appliedModelName}</span>
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap">
+        <td class="td-timeline px-4 py-3.5 whitespace-nowrap">
+          <span class="sm:hidden text-[10px] text-slate-400 font-sans font-semibold uppercase block mb-0.5">Timeline</span>
           ${stockoutBadge}
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap">
-          <!-- Editable Order Quantity Control (Instruction 1) -->
+        <td class="td-qty px-4 py-3.5 whitespace-nowrap">
+          <span class="sm:hidden text-[10px] text-slate-400 font-sans font-semibold uppercase block mb-1">Recommended Order Qty</span>
           <div class="flex items-center gap-1.5">
             <div class="inline-flex items-center border border-slate-200 rounded-lg bg-white shadow-2xs overflow-hidden">
               <button type="button" onclick="adjustPOQty('${item.sku}', -1)" class="qty-stepper-btn w-6 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 font-bold text-xs select-none transition-colors" title="Decrease order qty">−</button>
@@ -677,8 +682,8 @@ function renderForecastTable(enrichedItems) {
             Est: <span id="poCostDisplay_${item.sku}" class="font-bold text-slate-800">${StockPulse.profile.currency}${item.recommendedPOCost.toLocaleString('en-IN')}</span>
           </div>
         </td>
-        <td class="px-4 py-3.5 whitespace-nowrap text-center pr-6 min-w-[120px]">
-          <button onclick="openPOModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs whitespace-nowrap inline-flex items-center gap-1.5" title="View PO draft for this item">
+        <td class="td-action px-4 py-3.5 whitespace-nowrap text-center pr-6 min-w-[120px]">
+          <button onclick="openPOModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs whitespace-nowrap inline-flex items-center justify-center gap-1.5 w-full sm:w-auto" title="View PO draft for this item">
             <i data-lucide="file-text" class="w-3.5 h-3.5 text-[#851218]"></i>
             <span>PO Draft</span>
           </button>
