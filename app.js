@@ -2602,11 +2602,11 @@ window.sendPOViaWhatsApp = function(targetSupplier) {
   const poNumber = `PO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   let totalUnits = 0;
-  const maxLen = 25;
-  const divider = '------------------------------------';
+  const maxLen = 22;
+  const divider = '--------------------------------------';
   const tableLines = [
     divider,
-    'No.  Item Description          Qty  ',
+    'Sr.No  Item Description    Qty Ordered',
     divider
   ];
 
@@ -2614,12 +2614,12 @@ window.sendPOViaWhatsApp = function(targetSupplier) {
     const qty = item.recommendedPOQty > 0 ? item.recommendedPOQty : (item.moq || 1);
     totalUnits += qty;
 
-    const no = String(idx + 1).padStart(2, ' ');
-    const q = String(qty).padStart(4, ' ');
+    const no = String(idx + 1).padStart(3, ' ');
+    const q = String(qty).padStart(6, ' ');
     const name = (item.name || '').trim();
 
     if (name.length <= maxLen) {
-      tableLines.push(`${no}   ${name.padEnd(maxLen, ' ')} ${q}`);
+      tableLines.push(`${no}    ${name.padEnd(maxLen, ' ')}   ${q}`);
     } else {
       let splitIdx = name.lastIndexOf(' ', maxLen);
       if (splitIdx === -1 || splitIdx < 10) splitIdx = maxLen;
@@ -2628,8 +2628,8 @@ window.sendPOViaWhatsApp = function(targetSupplier) {
       if (part2.length > maxLen) {
         part2 = part2.substring(0, maxLen - 2) + '..';
       }
-      tableLines.push(`${no}   ${part1.padEnd(maxLen, ' ')} ${q}`);
-      tableLines.push(`     ${part2.padEnd(maxLen, ' ')}     `);
+      tableLines.push(`${no}    ${part1.padEnd(maxLen, ' ')}   ${q}`);
+      tableLines.push(`       ${part2.padEnd(maxLen, ' ')}         `);
     }
   });
   tableLines.push(divider);
@@ -2646,7 +2646,9 @@ ${tableLines.join('\n')}
 \`\`\`
 
 *Total SKUs:* ${orderList.length}
-*Total Units:* ${totalUnits} units`;
+*Total Units:* ${totalUnits} units
+
+Thank you!`;
 
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
 
